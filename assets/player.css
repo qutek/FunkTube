@@ -1,0 +1,220 @@
+@font-face {
+    font-family: 'icomoon';
+    src:url('fonts/icomoon.eot?-w1w780');
+    src:url('fonts/icomoon.eot?#iefix-w1w780') format('embedded-opentype'),
+        url('fonts/icomoon.woff?-w1w780') format('woff'),
+        url('fonts/icomoon.ttf?-w1w780') format('truetype'),
+        url('fonts/icomoon.svg?-w1w780#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-fullscreen:before {
+    content: "\e98b";
+}
+.icon-play:before {
+    content: "\ea1c";
+}
+.icon-pause:before {
+    content: "\ea1d";
+}
+.icon-mute:before {
+    content: "\ea27";
+}
+.icon-low:before {
+    content: "\ea28";
+}
+.icon-high:before {
+    content: "\ea2a";
+}
+
+.funk-player {
+  direction:ltr;
+  position: relative;
+  display: block;
+  height: 0;
+  padding: 0 0 56.25% 0;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+
+/*
+ * Play button (YouTube style)
+ */
+
+.thumb-play-button {
+  position: absolute;
+  top: 50% !important;
+  left: 50% !important;
+  width: 86px !important;
+  height: 60px !important;
+  padding: 0 !important;
+  margin: -29px 0 0 -42px !important;
+  font-size: normal !important;
+  font-weight: normal !important;
+  line-height: 1 !important;
+  opacity: .9;
+}
+
+.thumb-play-button-svg {
+  opacity: .9;
+  fill: #1f1f1f;
+}
+
+.lazyYT-image-loaded:hover .thumb-play-button-svg,
+.thumb-play-button:focus .thumb-play-button-svg {
+  opacity: 1;
+  fill: #cc181e;
+}
+
+.funk-player .funk-frame.video-loaded {
+	background: #000;
+}
+.funk-player .funk-frame.image-loaded {
+  	padding-bottom: inherit;
+  	cursor: pointer;
+  	background-position: 50% 50%;
+  	background-repeat: no-repeat;
+  	-webkit-background-size: cover;
+     -moz-background-size: cover;
+       -o-background-size: cover;
+          background-size: cover;
+}
+.funk-player iframe {
+	position: absolute;
+  	top: 0;
+  	bottom: 0;
+  	left: 0;
+  	width: 100%;
+  	height: 100%;
+  	border: 0;
+}
+
+/* Controls Container */
+.funk-player.focused .funk-yt-controls {
+  height: 34px;
+  -webkit-transition: height 500ms ease-out 0.1s;
+    -moz-transition: height 500ms ease-out 0.1s;
+    -o-transition: height 500ms ease-out 0.1s;
+    transition: height 500ms ease-out 0.1s;
+}
+.funk-player .funk-yt-controls {
+	position: absolute;
+	width: 100%;
+	height: 0px;
+	left: 0;
+	bottom: 0;
+	background: rgb(0,0,0); /* IE8- */
+	background: rgba(0,0,0, .7);
+}
+
+/* Controls Buttons */
+.funk-yt-controls .funk-yt-button {
+	display: block;
+  	cursor: pointer;
+  	margin: 5px;
+  	font-size: 24px;
+  	color: #fff;
+  	float: left;
+  	position: relative;
+}
+
+.funk-yt-controls .funk-yt-button.btn-right {
+	float: right;
+}
+
+
+/* Progress Bar */
+.funk-yt-controls div.funk-yt-time-rail {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: -10px;
+}
+
+.funk-yt-controls .funk-yt-time-rail span {
+	position: absolute;
+	display: block;
+	cursor: pointer;
+	width: 100%;
+	height: 10px;
+	top: 0;
+	left: 0;
+}
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-total {
+	background: rgb(152,152,152); /* IE8- */
+	background: rgba(152,152,152, .5);
+	width: 100%;
+}
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-loaded {
+	background: rgb(0,0,0); /* IE8- */
+	background: rgba(0,0,0, .3);
+}
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-current { width: 0; }
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-current:after {
+  content: '';
+  height: 15px;
+  width: 15px;
+  background-color: rgb(83, 174, 33);
+  display: block;
+  right: -5px;
+  position: absolute;
+  top: -2px;
+  border-radius: 100%;
+}
+
+/* Progress Bar Time Tooltip */
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-float {
+	position: absolute;
+	display: none;
+	width: 33px;
+	height: 23px;
+	top: -26px;
+	margin-left: -17px;
+	background: url(tooltip.png);
+}
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-current {
+	position: absolute;
+	display: block;
+	left: 0;
+	top: 4px;
+
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	color: #666666;
+	text-align: center;
+}
+
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-corner { display: none; }
+
+/* Green Gradient (for progress and volume bar) */
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-current,
+.funk-yt-controls .funk-yt-horizontal-volume-slider .funk-yt-horizontal-volume-current {
+	background: #82d344;
+	background: -webkit-linear-gradient(top, #82d344 0%, #51af34 100%);
+	background: -moz-linear-gradient(top, #82d344 0%, #51af34 100%);
+	background: -o-linear-gradient(top, #82d344 0%, #51af34 100%);
+	background: -ms-linear-gradient(top, #82d344 0%, #51af34 100%);
+	background: linear-gradient(top, #82d344 0%, #51af34 100%);
+}
