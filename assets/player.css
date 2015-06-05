@@ -116,7 +116,7 @@
 .funk-player .funk-yt-controls {
 	position: absolute;
 	width: 100%;
-	height: 0px;
+	height: 34px;
 	left: 0;
 	bottom: 0;
 	background: rgb(0,0,0); /* IE8- */
@@ -133,7 +133,14 @@
   	float: left;
   	position: relative;
 }
-
+.funk-yt-controls .funk-yt-info {
+  display: block;
+  margin: 3px;
+  font-size: 22px;
+  color: #fff;
+  float: left;
+  position: relative;
+}
 .funk-yt-controls .funk-yt-button.btn-right {
 	float: right;
 }

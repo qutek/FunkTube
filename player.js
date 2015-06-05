@@ -99,7 +99,7 @@
 					state = state.data;
 				}
 
-				alert(state);
+				// alert(state);
 
 				switch (state) {
 
@@ -324,6 +324,31 @@
 
 	};
 
+	var convertTime = function(secs) {
+
+		var hr = Math.floor(secs / 3600);
+        var min = Math.floor((secs - (hr * 3600)) / 60);
+        var sec = Math.floor(secs - (hr * 3600) - (min * 60));
+
+        // if (hr < 10) {
+        //     hr = "0" + hr;
+        // }
+        // if (min < 10) {
+        //     min = "0" + min;
+        // }
+        // if (sec < 10) {
+        //     sec = "0" + sec;
+        // }
+        // if (hr) {
+        //     hr = "00";
+        // }
+        hr = (hr < 10) ? "0" + hr : "00";
+        min = (min < 10) ? "0" + min : "00";
+        sec = (sec < 10) ? "0" + sec : "00";
+
+        return hr + ':' + min + ':' + sec;
+	};
+
 	/**
 	 * Public method to get all the player instances
 	 */
@@ -469,6 +494,8 @@
 		CONTROL.push('<div class="funk-yt-button icon-pause"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-mute"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-unmute"></div>');
+		CONTROL.push('<div class="funk-yt-info current-time">00:00</div>');
+		CONTROL.push('<div class="funk-yt-info total-time">| 00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen"></div>');
 		CONTROL.push('</div>');
 
@@ -662,7 +689,8 @@
 	FP.syncPlayer = function($player) {
 		setInterval(function(){
 		   	var data = $player.funkplayer('data');
-			$('#test').html(data.currentTime);
+		   	$player.find('.current-time').text(convertTime(data.currentTime));
+		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
 		},100); //polling frequency in miliseconds
 	};
 
