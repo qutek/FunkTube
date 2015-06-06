@@ -330,21 +330,22 @@
         var min = Math.floor((secs - (hr * 3600)) / 60);
         var sec = Math.floor(secs - (hr * 3600) - (min * 60));
 
-        // if (hr < 10) {
-        //     hr = "0" + hr;
-        // }
-        // if (min < 10) {
-        //     min = "0" + min;
-        // }
-        // if (sec < 10) {
-        //     sec = "0" + sec;
-        // }
-        // if (hr) {
-        //     hr = "00";
-        // }
-        hr = (hr < 10) ? "0" + hr : "00";
-        min = (min < 10) ? "0" + min : "00";
-        sec = (sec < 10) ? "0" + sec : "00";
+        if (hr < 10) {
+            hr = "0" + hr;
+        }
+        if (min < 10) {
+            min = "0" + min;
+        }
+        if (sec < 10) {
+            sec = "0" + sec;
+        }
+        if (hr) {
+            hr = "00";
+        }
+        
+        // hr = (hr < 10) ? "0" + hr : "00";
+        // min = (min < 10) ? "0" + min : "00";
+        // sec = (sec < 10) ? "0" + sec : "00";
 
         return hr + ':' + min + ':' + sec;
 	};
@@ -491,11 +492,11 @@
 		CONTROL.push('</div>');
 
 		CONTROL.push('<div class="funk-yt-button icon-play" data-control="play"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-pause"></div>');
+		CONTROL.push('<div class="funk-yt-button icon-pause" data-control="pause"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-mute"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-unmute"></div>');
-		CONTROL.push('<div class="funk-yt-info current-time">00:00</div>');
-		CONTROL.push('<div class="funk-yt-info total-time">| 00:00</div>');
+		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
+		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen"></div>');
 		CONTROL.push('</div>');
 
@@ -687,11 +688,21 @@
 	 * @return {[type]}         [description]
 	 */
 	FP.syncPlayer = function($player) {
+		// player time
 		setInterval(function(){
 		   	var data = $player.funkplayer('data');
 		   	$player.find('.current-time').text(convertTime(data.currentTime));
 		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
 		},100); //polling frequency in miliseconds
+
+		// progress bar
+		var rail = $player.find('.funk-yt-time-rail');
+		rail.find('.funk-yt-time-total').bind('mousedown', function(elemRail) {
+          var totWidth = rail.find('.funk-yt-time-total').width(),
+              left = elemRail.pageX;
+          alert(left);
+          // $(this).find('.funk-yt-time-current').css('width', left+'px');
+      	});
 	};
 
 	/**
