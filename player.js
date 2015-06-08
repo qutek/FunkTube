@@ -326,9 +326,10 @@
 
 	var convertTime = function(secs) {
 
-		var hr = Math.floor(secs / 3600);
-        var min = Math.floor((secs - (hr * 3600)) / 60);
-        var sec = Math.floor(secs - (hr * 3600) - (min * 60));
+		var hr = Math.floor(secs / 3600),
+        	min = Math.floor((secs - (hr * 3600)) / 60),
+        	sec = Math.floor(secs - (hr * 3600) - (min * 60)),
+        	time = '00:00:00';
 
         if (hr < 10) {
             hr = "0" + hr;
@@ -343,11 +344,15 @@
             hr = "00";
         }
         
-        // hr = (hr < 10) ? "0" + hr : "00";
-        // min = (min < 10) ? "0" + min : "00";
-        // sec = (sec < 10) ? "0" + sec : "00";
+        if(typeof(secs) == 'number'){
+            time = hr + ':' + min + ':' + sec;
+        }
 
-        return hr + ':' + min + ':' + sec;
+        return time;
+	};
+
+	var getPercent = function(cur, tot) {
+		return (cur / tot * 100).toFixed(2);
 	};
 
 	/**
@@ -483,8 +488,8 @@
         CONTROL.push('<div class="funk-yt-time-rail">');
       	CONTROL.push('<span class="funk-yt-time-total">');
         CONTROL.push('<span class="funk-yt-time-loaded" style="width: 286.79199079472px;"></span>');
-		CONTROL.push('<span class="funk-yt-time-current" style="width: 133.000000196439px;"></span>');
-		CONTROL.push('<span class="funk-yt-time-float" style="display: none; left: 122px;">');
+		CONTROL.push('<span class="funk-yt-time-current"></span>');
+		CONTROL.push('<span class="funk-yt-time-float" style="display: none; left: 122px;">'); // tooltip time
 		CONTROL.push('<span class="funk-yt-time-float-current">00:16</span>');
 		CONTROL.push('<span class="funk-yt-time-float-corner"></span>');
 		CONTROL.push('</span>');
@@ -688,20 +693,30 @@
 	 * @return {[type]}         [description]
 	 */
 	FP.syncPlayer = function($player) {
+		// default data
+		var data = {
+			duration: 0,
+			currentTime:0
+		};
+
 		// player time
 		setInterval(function(){
-		   	var data = $player.funkplayer('data');
+		   	data = $player.funkplayer('data'); // change data
 		   	$player.find('.current-time').text(convertTime(data.currentTime));
 		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
+			$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
 		},100); //polling frequency in miliseconds
 
 		// progress bar
 		var rail = $player.find('.funk-yt-time-rail');
 		rail.find('.funk-yt-time-total').bind('mousedown', function(elemRail) {
           var totWidth = rail.find('.funk-yt-time-total').width(),
-              left = elemRail.pageX;
-          alert(left);
-          // $(this).find('.funk-yt-time-current').css('width', left+'px');
+              left = elemRail.pageX,
+              timeSeek = (getPercent(left, totWidth) / 100) * data.duration;
+
+          // alert(data.duration+'|'+timeSeek);
+          $player.funkplayer('seek', timeSeek);
+          rail.find('.funk-yt-time-current').css('width', left+'px');
       	});
 	};
 
