@@ -9,7 +9,7 @@
 	'use strict';
 
 	/**
-	 * NameSpace
+	 * var
 	 */
 	var FUNKPLAYER = ".funkplayer",
 
@@ -459,6 +459,33 @@
 		// append controls
 		$(FP.getControl($player, o)).appendTo($player);
 
+		// fullscreen
+		$player.find('.fullscreen').on('click', function(){
+			var elem = $player.get(0);
+
+			if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+			    $player.addClass('fullscreen');
+
+			    if (elem.requestFullscreen) {
+			      elem.requestFullscreen();
+			    } else if (elem.mozRequestFullScreen) {
+			      elem.mozRequestFullScreen();
+			    } else if (elem.webkitRequestFullscreen) {
+			      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+			    }
+		  	} else {
+		  		$player.removeClass('fullscreen');
+
+			    if (document.cancelFullScreen) {
+			      document.cancelFullScreen();
+			    } else if (document.mozCancelFullScreen) {
+			      document.mozCancelFullScreen();
+			    } else if (document.webkitCancelFullScreen) {
+			      document.webkitCancelFullScreen();
+			    }
+		  	}
+		});
+
 		$( $player ).hover(
 		  	function() {
 		    	$( this ).addClass('focused');
@@ -509,11 +536,11 @@
 
 		CONTROL.push('<div class="funk-yt-button icon-play" data-control="play"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-pause" data-control="pause"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-mute"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-unmute"></div>');
+		CONTROL.push('<div class="funk-yt-button icon-unmute" data-control="mute"></div>');
+		CONTROL.push('<div class="funk-yt-button icon-mute" data-control="unmute"></div>');
 		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
-		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
 		CONTROL.push('</div>');
 
 		// insert the player container
