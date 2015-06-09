@@ -469,8 +469,8 @@
 
 				$player.funkplayer(bind, param);
 
-				var dt = $player.funkplayer('data');
-				console.log(dt);
+				// var dt = $player.funkplayer('data');
+				// console.log(dt);
 
 				// if($(this).attr('data-control') == 'play'){
 				// 	$player.funkplayer(bind, param);
@@ -487,7 +487,7 @@
 		CONTROL.push('<div class="funk-yt-controls">');
         CONTROL.push('<div class="funk-yt-time-rail">');
       	CONTROL.push('<span class="funk-yt-time-total">');
-        CONTROL.push('<span class="funk-yt-time-loaded" style="width: 286.79199079472px;"></span>');
+        CONTROL.push('<span class="funk-yt-time-loaded"></span>');
 		CONTROL.push('<span class="funk-yt-time-current"></span>');
 		CONTROL.push('<span class="funk-yt-time-float" style="display: none; left: 122px;">'); // tooltip time
 		CONTROL.push('<span class="funk-yt-time-float-current">00:16</span>');
@@ -696,7 +696,8 @@
 		// default data
 		var data = {
 			duration: 0,
-			currentTime:0
+			currentTime:0,
+			videoLoadedFraction:0
 		};
 
 		// player time
@@ -705,6 +706,8 @@
 		   	$player.find('.current-time').text(convertTime(data.currentTime));
 		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
 			$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
+			// $('#test').html(data.videoLoadedFraction);
+			$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
 		},100); //polling frequency in miliseconds
 
 		// progress bar
@@ -714,7 +717,7 @@
               left = elemRail.pageX,
               timeSeek = (getPercent(left, totWidth) / 100) * data.duration;
 
-          // alert(data.duration+'|'+timeSeek);
+          // alert(data.videoLoadedFraction);
           $player.funkplayer('seek', timeSeek);
           rail.find('.funk-yt-time-current').css('width', left+'px');
       	});
