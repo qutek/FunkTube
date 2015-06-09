@@ -324,6 +324,11 @@
 
 	};
 
+	/**
+	 * Convert integer time to time format
+	 * @param  {[type]} secs [description]
+	 * @return {[type]}      [description]
+	 */
 	var convertTime = function(secs) {
 
 		var hr = Math.floor(secs / 3600),
@@ -351,6 +356,12 @@
         return time;
 	};
 
+	/**
+	 * get percentage based time and total time
+	 * @param  {[type]} cur [description]
+	 * @param  {[type]} tot [description]
+	 * @return {[type]}     [description]
+	 */
 	var getPercent = function(cur, tot) {
 		return (cur / tot * 100).toFixed(2);
 	};
