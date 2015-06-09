@@ -233,3 +233,24 @@
   width: 100%;
   height: 100%;
 }
+
+
+.funk-yt-slide {
+      width: 150px;
+      height: 10px;
+      background-color: #ccc;
+      cursor: pointer;
+        display: block;
+  cursor: pointer;
+  margin: 5px;
+  font-size: 24px;
+  color: #fff;
+  float: left;
+  position: relative;
+    }
+
+    .control {
+      background-color: white;
+      height: 10px;
+      width: 70%;
+    }

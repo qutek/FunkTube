@@ -366,6 +366,11 @@
 		return (cur / tot * 100).toFixed(2);
 	};
 
+	var setFill = function(event, controlData) {
+	  var percent = (event.clientX - controlData.cOffset.left) * (100/controlData.cWidth);
+	  return percent;
+	};
+
 	/**
 	 * Public method to get all the player instances
 	 */
@@ -538,6 +543,7 @@
 		CONTROL.push('<div class="funk-yt-button icon-pause" data-control="pause"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-unmute" data-control="mute"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-mute" data-control="unmute"></div>');
+		CONTROL.push('<div class="funk-yt-slide"><div class="control"></div></div>');
 		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
@@ -759,6 +765,34 @@
           $player.funkplayer('seek', timeSeek);
           rail.find('.funk-yt-time-current').css('width', left+'px');
       	});
+
+      	// try volume
+      	var $control = $player.find('.funk-yt-slide'),
+		    $window = $(window),
+		    controlData = {
+			    cFill: $control.find('.control'),
+			    cWidth: $control.width(),
+			    cOffset: $control.offset()
+			};
+
+		// alert($player.funkplayer('volume'));
+		// console.log($player.funkplayer('volume'));
+
+		$control.on('mousedown', function() {
+		  $control.on('mousemove', function(){
+		  	controlData.cFill.css('width', setFill(event, controlData) + '%');
+		  	$player.funkplayer('volume', setFill(event, controlData).toFixed());
+		  });
+		});
+
+		$control.on('click', function(event) {
+		  controlData.cFill.css('width', setFill(event, controlData) + '%');
+		  $player.funkplayer('volume', setFill(event, controlData).toFixed());
+		});
+
+		$window.on('mouseup', function(event) {
+		  $control.off('mousemove');
+		});
 	};
 
 	/**
