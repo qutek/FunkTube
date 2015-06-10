@@ -547,6 +547,9 @@
 		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-right">');
+		CONTROL.push('<select class="funk-yt-select btn-right quality"><option value="auto">Auto</option></select>');
+		CONTROL.push('</div>');
 		CONTROL.push('</div>');
 
 		// insert the player container
@@ -741,7 +744,9 @@
 		var data = {
 			duration: 0,
 			currentTime:0,
-			videoLoadedFraction:0
+			videoLoadedFraction:0,
+			quality: 'auto',
+			availableQualityLevels: ["auto"]
 		};
 
 		// player time
@@ -775,9 +780,6 @@
 			    cOffset: $control.offset()
 			};
 
-		// alert($player.funkplayer('volume'));
-		// console.log($player.funkplayer('volume'));
-
 		$control.on('mousedown', function() {
 		  $control.on('mousemove', function(){
 		  	controlData.cFill.css('width', setFill(event, controlData) + '%');
@@ -793,6 +795,15 @@
 		$window.on('mouseup', function(event) {
 		  $control.off('mousemove');
 		});
+
+		// quality
+		$player.find('.quality').html(data.availableQualityLevels)
+		.on('click', function(){
+			var qualityopt = data.availableQualityLevels;
+			$(this).append(qualityopt);
+		});
+		// $player.find('.quality').html(data.availableQualityLevels.join(","));
+		// $('#test').html(data.availableQualityLevels.join(","));
 	};
 
 	/**
