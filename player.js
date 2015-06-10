@@ -371,6 +371,17 @@
 	  return percent;
 	};
 
+	var updateOption = function(dataOpt){
+		var optionsarray = dataOpt,
+			seloption = '';
+
+		$.each(optionsarray,function(i){
+		    seloption += '<option value="'+optionsarray[i]+'">'+optionsarray[i]+'</option>'; 
+		});
+
+		return seloption;
+	};
+
 	/**
 	 * Public method to get all the player instances
 	 */
@@ -548,7 +559,7 @@
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
 		CONTROL.push('<div class="funk-yt-button btn-right">');
-		CONTROL.push('<select class="funk-yt-select btn-right quality"><option value="auto">Auto</option></select>');
+		CONTROL.push('<select class="funk-yt-select btn-right quality"><option value="auto">auto</option></select>');
 		CONTROL.push('</div>');
 		CONTROL.push('</div>');
 
@@ -746,7 +757,7 @@
 			currentTime:0,
 			videoLoadedFraction:0,
 			quality: 'auto',
-			availableQualityLevels: ["auto"]
+			availableQualityLevels: ['auto']
 		};
 
 		// player time
@@ -757,6 +768,18 @@
 			$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
 			// $('#test').html(data.videoLoadedFraction);
 			$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
+			
+			// update quality options
+			if (typeof(data.availableQualityLevels) !== 'undefined' && data.availableQualityLevels.length > 0) {
+				var quality = $player.funkplayer('quality');
+
+				$player.find('.quality').html(updateOption(data.availableQualityLevels)).val(quality)
+				.on('change', function(){
+					var newquality = $(this).val();
+					$player.funkplayer('quality', newquality);
+				});
+				console.log(quality);
+			}
 		},100); //polling frequency in miliseconds
 
 		// progress bar
@@ -797,11 +820,7 @@
 		});
 
 		// quality
-		$player.find('.quality').html(data.availableQualityLevels)
-		.on('click', function(){
-			var qualityopt = data.availableQualityLevels;
-			$(this).append(qualityopt);
-		});
+		$player.find('.quality').html(updateOption(data.availableQualityLevels));
 		// $player.find('.quality').html(data.availableQualityLevels.join(","));
 		// $('#test').html(data.availableQualityLevels.join(","));
 	};
