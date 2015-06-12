@@ -77,7 +77,7 @@
 	 * internally - stateChange, onError, qualityChange. Change them at your
 	 * own risk.
 	 */
-	$.funkplayer.defaults = {
+	$.funkplayer.actions = {
 
 		afterReady: function($player) {
 			// use dynamic action after ready
@@ -100,29 +100,29 @@
 				}
 
 				// alert(state);
-
+				// pass state action to action that have join with user options
 				switch (state) {
 
-				case FP.State.UNSTARTED:
-					return _ret.unstarted[player].call(_player);
+					case FP.State.UNSTARTED:
+						return _ret.unstarted[player].call(_player);
 
-				case FP.State.ENDED:
-					return _ret.ended[player].call(_player);
+					case FP.State.ENDED:
+						return _ret.ended[player].call(_player);
 
-				case FP.State.PLAYING:
-					return _ret.playing[player].call(_player);
+					case FP.State.PLAYING:
+						return _ret.playing[player].call(_player);
 
-				case FP.State.PAUSED:
-					return _ret.paused[player].call(_player);
+					case FP.State.PAUSED:
+						return _ret.paused[player].call(_player);
 
-				case FP.State.BUFFERING:
-					return _ret.buffering[player].call(_player);
+					case FP.State.BUFFERING:
+						return _ret.buffering[player].call(_player);
 
-				case FP.State.CUED:
-					return _ret.cued[player].call(_player);
+					case FP.State.CUED:
+						return _ret.cued[player].call(_player);
 
-				default:
-					return null;
+					default:
+						return null;
 
 				}
 			};
@@ -427,7 +427,7 @@
 			$player.bind(event + FUNKPLAYER, $player, PLAYER[event]);
 
 		// initialize the default event methods o.initialVideo
-		FP.initDefaults($.funkplayer.defaults, o);
+		FP.initDefaults($.funkplayer.actions, o);
 
 		// get image
 		// width and height might override default_ratio value
@@ -654,15 +654,15 @@
 
 						var $player = $(evt.target.getIframe()).parents("." + FUNKPLAYER_CLASS);
 
-						$.funkplayer.defaults.afterReady($player);
+						$.funkplayer.actions.afterReady($player);
 
 					},
 
-					'onPlaybackQualityChange': $.funkplayer.defaults.qualityChange(o.playerID),
+					'onPlaybackQualityChange': $.funkplayer.actions.qualityChange(o.playerID),
 
-					'onStateChange': $.funkplayer.defaults.stateChange(o.playerID),
+					'onStateChange': $.funkplayer.actions.stateChange(o.playerID),
 
-					'onError': $.funkplayer.defaults.onError(o.playerID)
+					'onError': $.funkplayer.actions.onError(o.playerID)
 
 				}
 
@@ -699,7 +699,7 @@
 	};
 
 	/**
-	 * @param d - the defaults
+	 * @param d - the defaults actions
 	 * @param o - the options w/ methods to attach
 	 */
 	FP.initDefaults = function(d, o) {
@@ -708,7 +708,10 @@
 
 		// default onPlayer events
 		var dp = d.onPlayer;
-		dp.unstarted[ID] = o.onPlayerUnstarted;
+		dp.unstarted[ID] = function(){
+			alert('disii');
+			o.onPlayerUnstarted;
+		};
 		dp.ended[ID] = o.onPlayerEnded;
 		dp.playing[ID] = o.onPlayerPlaying;
 		dp.paused[ID] = o.onPlayerPaused;
@@ -921,7 +924,7 @@
 
 				var pid = playerId.replace(/-/g, '');
 
-				var d = $.funkplayer.defaults;
+				var d = $.funkplayer.actions;
 				$.funkplayer.events[pid] = {
 					"stateChange": d.stateChange(playerId),
 					"error": d.onError(playerId),
@@ -936,7 +939,7 @@
 
 				var $player = $(player).parents("." + FUNKPLAYER_CLASS);
 
-				$.funkplayer.defaults.afterReady($player);
+				$.funkplayer.actions.afterReady($player);
 
 			};
 
@@ -1143,7 +1146,7 @@
 			delete FP.ytplayers[p.opts.playerID];
 
 			// cleanup callback handler references..
-			var d = $.funkplayer.defaults;
+			var d = $.funkplayer.actions;
 
 			var events = ['unstarted', 'ended', 'playing', 'paused', 'buffering', 'cued'];
 
@@ -1166,12 +1169,6 @@
 			$(p.ytplayer).remove();
 
 			return null;
-
-		}),
-
-		anu: wrap_fn(function(evt, param, p) {
-
-			return alert('ok');
 
 		}),
 
