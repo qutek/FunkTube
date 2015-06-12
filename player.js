@@ -708,7 +708,10 @@
 
 		// default onPlayer events
 		var dp = d.onPlayer;
-		dp.unstarted[ID] = o.onPlayerUnstarted;
+		dp.unstarted[ID] = function(){
+			alert('disii');
+			o.onPlayerUnstarted;
+		};
 		dp.ended[ID] = o.onPlayerEnded;
 		dp.playing[ID] = o.onPlayerPlaying;
 		dp.paused[ID] = o.onPlayerPaused;
