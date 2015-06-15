@@ -240,7 +240,7 @@
 /**
  * Fullscreen
  */
-.funk-yt-controls .funk-player.fullscreen {
+.funk-player.fullscreen {
   width: 100%;
   height: 100%;
 }
@@ -250,9 +250,6 @@
  * (Volume and Progress bar)
  */
 .funk-yt-controls .funk-yt-slide {
-  width: 150px;
-  height: 10px;
-  background-color: #ccc;
   cursor: pointer;
   display: block;
   cursor: pointer;
@@ -263,11 +260,14 @@
 }
 .funk-yt-controls .funk-yt-slide.volume {
   margin-top: 12px;
+  width: 150px;
+  height: 10px;
+  background-color: #ccc;
 }
-.funk-yt-controls .funk-yt-slide .slide-control {
+.funk-yt-controls .funk-yt-slide.volume .slide-control {
   background-color: white;
   height: 10px;
-  width: 70%;
+  /*width: 70%;*/
 }
 
 /**
@@ -371,6 +371,7 @@
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
 }
 .funk-yt-controls .quality li a {
+  cursor: pointer;
   display: block;
   position: relative;
   margin: 0 -13px;
