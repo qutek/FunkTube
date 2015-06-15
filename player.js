@@ -52,9 +52,9 @@
 			'CANT_PLAY': 150
 		},
 
-		Bind: undefined,
+		// Bind: undefined,
 
-		Param: undefined
+		// Param: undefined
 		
 	};
 
@@ -77,14 +77,72 @@
 	 * internally - stateChange, onError, qualityChange. Change them at your
 	 * own risk.
 	 */
-	$.funkplayer.actions = {
+	$.funkplayer.defaults = {
 
-		afterReady: function($player) {
+		afterReady: function($player, o) {
+			alert('readih');
+			// default data
+			// var data = {
+			// 	duration: 0,
+			// 	currentTime:0,
+			// 	videoLoadedFraction:0,
+			// 	quality: 'auto',
+			// 	availableQualityLevels: ['auto']
+			// };
+
+			// data = $player.funkplayer('data'); // change data
+			// alert(data.duration);
+
 			// use dynamic action after ready
-			var bind = (typeof(FP.Bind) == 'undefined') ? 'play' : FP.Bind;
-			$player.funkplayer(bind, FP.Param);
+			// var bind = (typeof(FP.Bind) == 'undefined') ? 'play' : FP.Bind;
+			// $player.funkplayer(bind, FP.Param);
 
 			// alert($player.funkplayer('data'));
+			$(FP.getControl($player, o)).appendTo($player);
+			
+			$player.find('.funk-yt-button').on('click', function(){
+				var bind = $(this).attr('data-control'),
+					param = $(this).attr('data-param');
+
+				if(typeof(bind) == 'string'){
+					$player.funkplayer(bind, param);
+				}
+			});
+
+			// fullscreen
+			$player.find('.fullscreen').on('click', function(){
+				var elem = $player.get(0);
+
+				if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+				    $player.addClass('fullscreen');
+
+				    if (elem.requestFullscreen) {
+				      elem.requestFullscreen();
+				    } else if (elem.mozRequestFullScreen) {
+				      elem.mozRequestFullScreen();
+				    } else if (elem.webkitRequestFullscreen) {
+				      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+				    }
+			  	} else {
+			  		$player.removeClass('fullscreen');
+
+				    if (document.cancelFullScreen) {
+				      document.cancelFullScreen();
+				    } else if (document.mozCancelFullScreen) {
+				      document.mozCancelFullScreen();
+				    } else if (document.webkitCancelFullScreen) {
+				      document.webkitCancelFullScreen();
+				    }
+			  	}
+			});
+
+			$( $player ).hover(
+			  	function() {
+			    	$( this ).addClass('focused');
+			  	}, function() {
+			    	$( this ).removeClass('focused');
+			  	}
+			);
 
 		}, // args: $player
 		stateChange: function(player) {
@@ -100,29 +158,29 @@
 				}
 
 				// alert(state);
-				// pass state action to action that have join with user options
+
 				switch (state) {
 
-					case FP.State.UNSTARTED:
-						return _ret.unstarted[player].call(_player);
+				case FP.State.UNSTARTED:
+					return _ret.unstarted[player].call(_player);
 
-					case FP.State.ENDED:
-						return _ret.ended[player].call(_player);
+				case FP.State.ENDED:
+					return _ret.ended[player].call(_player);
 
-					case FP.State.PLAYING:
-						return _ret.playing[player].call(_player);
+				case FP.State.PLAYING:
+					return _ret.playing[player].call(_player);
 
-					case FP.State.PAUSED:
-						return _ret.paused[player].call(_player);
+				case FP.State.PAUSED:
+					return _ret.paused[player].call(_player);
 
-					case FP.State.BUFFERING:
-						return _ret.buffering[player].call(_player);
+				case FP.State.BUFFERING:
+					return _ret.buffering[player].call(_player);
 
-					case FP.State.CUED:
-						return _ret.cued[player].call(_player);
+				case FP.State.CUED:
+					return _ret.cued[player].call(_player);
 
-					default:
-						return null;
+				default:
+					return null;
 
 				}
 			};
@@ -427,7 +485,7 @@
 			$player.bind(event + FUNKPLAYER, $player, PLAYER[event]);
 
 		// initialize the default event methods o.initialVideo
-		FP.initDefaults($.funkplayer.actions, o);
+		FP.initDefaults($player, $.funkplayer.defaults, o);
 
 		// get image
 		// width and height might override default_ratio value
@@ -471,66 +529,6 @@
 		//     alert(data.data.title);
 		//     // data contains the JSON-Object below
 		// });
-
-		// append controls
-		$(FP.getControl($player, o)).appendTo($player);
-
-		// fullscreen
-		$player.find('.fullscreen').on('click', function(){
-			var elem = $player.get(0);
-
-			if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-			    $player.addClass('fullscreen');
-
-			    if (elem.requestFullscreen) {
-			      elem.requestFullscreen();
-			    } else if (elem.mozRequestFullScreen) {
-			      elem.mozRequestFullScreen();
-			    } else if (elem.webkitRequestFullscreen) {
-			      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-			    }
-		  	} else {
-		  		$player.removeClass('fullscreen');
-
-			    if (document.cancelFullScreen) {
-			      document.cancelFullScreen();
-			    } else if (document.mozCancelFullScreen) {
-			      document.mozCancelFullScreen();
-			    } else if (document.webkitCancelFullScreen) {
-			      document.webkitCancelFullScreen();
-			    }
-		  	}
-		});
-
-		$( $player ).hover(
-		  	function() {
-		    	$( this ).addClass('focused');
-		  	}, function() {
-		    	$( this ).removeClass('focused');
-		  	}
-		);
-
-		$player.find('.funk-yt-button').on('click', function(){
-			var bind = $(this).attr('data-control'),
-				param = $(this).attr('data-param');
-
-			if(typeof(bind) == 'string'){
-				if(FP.inited == false){
-					FP.initPlayer($player, o);
-					FP.Bind = bind;
-					FP.Param = param;
-				}
-
-				$player.funkplayer(bind, param);
-
-				// var dt = $player.funkplayer('data');
-				// console.log(dt);
-
-				// if($(this).attr('data-control') == 'play'){
-				// 	$player.funkplayer(bind, param);
-				// }
-			}
-		});
 
 		return $player;
 
@@ -612,7 +610,7 @@
 
 				playerVars: {
 
-					'autoplay': 0, // force autoplay false because controled with our custom controls
+					'autoplay': 1, // force autoplay false because controled with our custom controls
 
 					'autohide': 1,
 
@@ -654,15 +652,15 @@
 
 						var $player = $(evt.target.getIframe()).parents("." + FUNKPLAYER_CLASS);
 
-						$.funkplayer.actions.afterReady($player);
+						$.funkplayer.defaults.afterReady($player, o);
 
 					},
 
-					'onPlaybackQualityChange': $.funkplayer.actions.qualityChange(o.playerID),
+					'onPlaybackQualityChange': $.funkplayer.defaults.qualityChange(o.playerID),
 
-					'onStateChange': $.funkplayer.actions.stateChange(o.playerID),
+					'onStateChange': $.funkplayer.defaults.stateChange(o.playerID),
 
-					'onError': $.funkplayer.actions.onError(o.playerID)
+					'onError': $.funkplayer.defaults.onError(o.playerID)
 
 				}
 
@@ -699,27 +697,110 @@
 	};
 
 	/**
-	 * @param d - the defaults actions
+	 * @param d - the defaults
 	 * @param o - the options w/ methods to attach
 	 */
-	FP.initDefaults = function(d, o) {
+	FP.initDefaults = function($player, d, o) {
 
 		var ID = o.playerID;
 
 		// default onPlayer events
 		var dp = d.onPlayer;
+
+		// default data
+		var data = {
+			duration: 0,
+			currentTime:0,
+			videoLoadedFraction:0,
+			quality: 'auto',
+			availableQualityLevels: ['auto']
+		};
+
 		dp.unstarted[ID] = function(){
-			alert('disii');
 			o.onPlayerUnstarted;
 		};
-		dp.ended[ID] = o.onPlayerEnded;
-		dp.playing[ID] = o.onPlayerPlaying;
-		dp.paused[ID] = o.onPlayerPaused;
-		dp.buffering[ID] = o.onPlayerBuffering;
-		dp.cued[ID] = o.onPlayerCued;
+		dp.ended[ID] = function(){
+			alert('ended');
+			o.onPlayerEnded;
+		};
+		dp.playing[ID] = function(){
+			alert('playing');
+			setInterval(function(){
+			   	data = $player.funkplayer('data'); // change data
+			   	$player.find('.current-time').text(convertTime(data.currentTime));
+			   	$player.find('.total-time').text('| '+ convertTime(data.duration));
+				$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
+				$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
+			},100); //polling frequency in miliseconds
+
+			// progress bar
+			var rail = $player.find('.funk-yt-time-rail');
+			rail.find('.funk-yt-time-total').bind('mousedown', function(elemRail) {
+	          var totWidth = rail.find('.funk-yt-time-total').width(),
+	              left = elemRail.pageX,
+	              timeSeek = (getPercent(left, totWidth) / 100) * data.duration;
+
+	          // alert(data.videoLoadedFraction);
+	          $player.funkplayer('seek', timeSeek);
+	          rail.find('.funk-yt-time-current').css('width', left+'px');
+	      	});
+
+	      	var $control = $player.find('.funk-yt-slide'),
+			    $window = $(window),
+			    controlData = {
+				    cFill: $control.find('.control'),
+				    cWidth: $control.width(),
+				    cOffset: $control.offset()
+				};
+
+			$control.on('mousedown', function() {
+			  $control.on('mousemove', function(){
+			  	controlData.cFill.css('width', setFill(event, controlData) + '%');
+			  	$player.funkplayer('volume', setFill(event, controlData).toFixed());
+			  });
+			});
+
+			$control.on('click', function(event) {
+			  controlData.cFill.css('width', setFill(event, controlData) + '%');
+			  $player.funkplayer('volume', setFill(event, controlData).toFixed());
+			});
+
+			$window.on('mouseup', function(event) {
+			  $control.off('mousemove');
+			});
+
+			o.onPlayerPlaying;
+		};
+		dp.paused[ID] = function(){
+			alert('pause');
+			o.onPlayerPaused;
+		};
+		dp.buffering[ID] = function(){
+			alert('buffering');
+			o.onPlayerBuffering;
+		};
+		dp.cued[ID] = function(){
+			alert('cued');
+			o.onPlayerCued;
+		};
 
 		// default onQualityChange
-		d.onQualityChange[ID] = o.onQualityChange;
+		d.onQualityChange[ID] = function(){
+			// alert(data.availableQualityLevels);s
+
+			// update quality options
+			if (typeof(data.availableQualityLevels) !== 'undefined' && data.availableQualityLevels.length > 0) {
+				var quality = $player.funkplayer('quality');
+				$player.find('.quality').html(updateOption(data.availableQualityLevels)).val(quality)
+				.on('change', function(){
+					var newquality = $(this).val();
+					$player.funkplayer('quality', newquality);
+				});
+				// console.log(quality);
+			}
+			// call user function
+			o.onQualityChange;
+		};
 
 		// default onError events
 		var de = d.onErr;
@@ -744,88 +825,6 @@
 
 		$($player).find('.funk-frame').removeClass('image-loaded').addClass('video-loaded')
 		.css('background-image','');
-
-		FP.syncPlayer($player);
-	};
-
-	/**
-	 * [syncPlayer description]
-	 * @param  {[type]} $player [description]
-	 * @return {[type]}         [description]
-	 */
-	FP.syncPlayer = function($player) {
-		// default data
-		var data = {
-			duration: 0,
-			currentTime:0,
-			videoLoadedFraction:0,
-			quality: 'auto',
-			availableQualityLevels: ['auto']
-		};
-
-		// player time
-		setInterval(function(){
-		   	data = $player.funkplayer('data'); // change data
-		   	$player.find('.current-time').text(convertTime(data.currentTime));
-		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
-			$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
-			// $('#test').html(data.videoLoadedFraction);
-			$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
-			
-			// update quality options
-			if (typeof(data.availableQualityLevels) !== 'undefined' && data.availableQualityLevels.length > 0) {
-				var quality = $player.funkplayer('quality');
-
-				$player.find('.quality').html(updateOption(data.availableQualityLevels)).val(quality)
-				.on('change', function(){
-					var newquality = $(this).val();
-					$player.funkplayer('quality', newquality);
-				});
-				console.log(quality);
-			}
-		},100); //polling frequency in miliseconds
-
-		// progress bar
-		var rail = $player.find('.funk-yt-time-rail');
-		rail.find('.funk-yt-time-total').bind('mousedown', function(elemRail) {
-          var totWidth = rail.find('.funk-yt-time-total').width(),
-              left = elemRail.pageX,
-              timeSeek = (getPercent(left, totWidth) / 100) * data.duration;
-
-          // alert(data.videoLoadedFraction);
-          $player.funkplayer('seek', timeSeek);
-          rail.find('.funk-yt-time-current').css('width', left+'px');
-      	});
-
-      	// try volume
-      	var $control = $player.find('.funk-yt-slide'),
-		    $window = $(window),
-		    controlData = {
-			    cFill: $control.find('.control'),
-			    cWidth: $control.width(),
-			    cOffset: $control.offset()
-			};
-
-		$control.on('mousedown', function() {
-		  $control.on('mousemove', function(){
-		  	controlData.cFill.css('width', setFill(event, controlData) + '%');
-		  	$player.funkplayer('volume', setFill(event, controlData).toFixed());
-		  });
-		});
-
-		$control.on('click', function(event) {
-		  controlData.cFill.css('width', setFill(event, controlData) + '%');
-		  $player.funkplayer('volume', setFill(event, controlData).toFixed());
-		});
-
-		$window.on('mouseup', function(event) {
-		  $control.off('mousemove');
-		});
-
-		// quality
-		$player.find('.quality').html(updateOption(data.availableQualityLevels));
-		// $player.find('.quality').html(data.availableQualityLevels.join(","));
-		// $('#test').html(data.availableQualityLevels.join(","));
 	};
 
 	/**
@@ -895,7 +894,7 @@
 			url.push("?&enablejsapi=1&version=3");
 			url.push("&playerapiid=" + o.playerID);
 			url.push("&rel=" + (o.showRelated ? 1 : 0));
-			url.push("&autoplay=0");
+			url.push("&autoplay=1");
 			url.push("&autohide=1");
 			url.push("&loop=" + (o.loop ? 1 : 0));
 			url.push("&playlist=" + (o.loop ? o.initialVideo : ""));
@@ -924,7 +923,7 @@
 
 				var pid = playerId.replace(/-/g, '');
 
-				var d = $.funkplayer.actions;
+				var d = $.funkplayer.defaults;
 				$.funkplayer.events[pid] = {
 					"stateChange": d.stateChange(playerId),
 					"error": d.onError(playerId),
@@ -939,7 +938,7 @@
 
 				var $player = $(player).parents("." + FUNKPLAYER_CLASS);
 
-				$.funkplayer.actions.afterReady($player);
+				$.funkplayer.defaults.afterReady($player, o);
 
 			};
 
@@ -1146,7 +1145,7 @@
 			delete FP.ytplayers[p.opts.playerID];
 
 			// cleanup callback handler references..
-			var d = $.funkplayer.actions;
+			var d = $.funkplayer.defaults;
 
 			var events = ['unstarted', 'ended', 'playing', 'paused', 'buffering', 'cued'];
 
@@ -1169,6 +1168,12 @@
 			$(p.ytplayer).remove();
 
 			return null;
+
+		}),
+
+		anu: wrap_fn(function(evt, param, p) {
+
+			return alert('ok');
 
 		}),
 
