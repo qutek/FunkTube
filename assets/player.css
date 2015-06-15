@@ -83,29 +83,31 @@
 }
 
 .funk-player .funk-frame.video-loaded {
-	background: #000;
+  background: #000;
 }
 .funk-player .funk-frame.image-loaded {
-  	padding-bottom: inherit;
-  	cursor: pointer;
-  	background-position: 50% 50%;
-  	background-repeat: no-repeat;
-  	-webkit-background-size: cover;
+    padding-bottom: inherit;
+    cursor: pointer;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    -webkit-background-size: cover;
      -moz-background-size: cover;
        -o-background-size: cover;
           background-size: cover;
 }
 .funk-player iframe {
-	position: absolute;
-  	top: 0;
-  	bottom: 0;
-  	left: 0;
-  	width: 100%;
-  	height: 100%;
-  	border: 0;
+  position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
 }
 
-/* Controls Container */
+/**
+ * Controls Container
+ */
 .funk-player.focused .funk-yt-controls {
   height: 34px;
   -webkit-transition: height 500ms ease-out 0.1s;
@@ -114,24 +116,26 @@
     transition: height 500ms ease-out 0.1s;
 }
 .funk-player .funk-yt-controls {
-	position: absolute;
-	width: 100%;
-	height: 0px;
-	left: 0;
-	bottom: 0;
-	background: rgb(0,0,0); /* IE8- */
-	background: rgba(0,0,0, .7);
+  position: absolute;
+  width: 100%;
+  height: 0px;
+  left: 0;
+  bottom: 0;
+  background: rgb(0,0,0); /* IE8- */
+  background: rgba(0,0,0, .7);
 }
 
-/* Controls Buttons */
+/**
+ * Controls Buttons
+ */
 .funk-yt-controls .funk-yt-button {
-	display: block;
-  	cursor: pointer;
-  	margin: 5px;
-  	font-size: 24px;
-  	color: #fff;
-  	float: left;
-  	position: relative;
+  display: block;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 24px;
+    color: #fff;
+    float: left;
+    position: relative;
 }
 .funk-yt-controls .funk-yt-info {
   font-family: sans-serif;
@@ -143,36 +147,38 @@
   position: relative;
 }
 .funk-yt-controls .btn-right {
-	float: right;
+  float: right;
 }
 
 
-/* Progress Bar */
+/**
+ * Progress Bar
+ */
 .funk-yt-controls div.funk-yt-time-rail {
-	position: absolute;
-	width: 100%;
-	left: 0;
-	top: -10px;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: -10px;
 }
 
 .funk-yt-controls .funk-yt-time-rail span {
-	position: absolute;
-	display: block;
-	cursor: pointer;
-	width: 100%;
-	height: 10px;
-	top: 0;
-	left: 0;
+  position: absolute;
+  display: block;
+  cursor: pointer;
+  width: 100%;
+  height: 10px;
+  top: 0;
+  left: 0;
 }
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-total {
-	background: rgb(152,152,152); /* IE8- */
-	background: rgba(152,152,152, .5);
-	width: 100%;
+  background: rgb(152,152,152); /* IE8- */
+  background: rgba(152,152,152, .5);
+  width: 100%;
 }
 
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-loaded {
-	background: rgb(0,0,0); /* IE8- */
-	background: rgba(0,0,0, .3);
+  background: rgb(0,0,0); /* IE8- */
+  background: rgba(0,0,0, .3);
 }
 
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-current { width: 0; }
@@ -189,28 +195,33 @@
   border-radius: 100%;
 }
 
-/* Progress Bar Time Tooltip */
+/**
+ * Progress Bar Time Tooltip
+ */
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float {
-	position: absolute;
-	display: none;
-	width: 33px;
-	height: 23px;
-	top: -26px;
-	margin-left: -17px;
-	background: url(tooltip.png);
+  position: absolute;
+  display: none;
+  width: 33px;
+  height: 23px;
+  top: -26px;
+  margin-left: -17px;
+  background: url(tooltip.png);
+}
+.funk-player.focused .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float {
+  display: block;
 }
 
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-current {
-	position: absolute;
-	display: block;
-	left: 0;
-	top: 4px;
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 4px;
 
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 10px;
-	font-weight: bold;
-	color: #666666;
-	text-align: center;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  color: #666666;
+  text-align: center;
 }
 
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-corner { display: none; }
@@ -218,12 +229,12 @@
 /* Green Gradient (for progress and volume bar) */
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-current,
 .funk-yt-controls .funk-yt-horizontal-volume-slider .funk-yt-horizontal-volume-current {
-	background: #82d344;
-	background: -webkit-linear-gradient(top, #82d344 0%, #51af34 100%);
-	background: -moz-linear-gradient(top, #82d344 0%, #51af34 100%);
-	background: -o-linear-gradient(top, #82d344 0%, #51af34 100%);
-	background: -ms-linear-gradient(top, #82d344 0%, #51af34 100%);
-	background: linear-gradient(top, #82d344 0%, #51af34 100%);
+  background: #82d344;
+  background: -webkit-linear-gradient(top, #82d344 0%, #51af34 100%);
+  background: -moz-linear-gradient(top, #82d344 0%, #51af34 100%);
+  background: -o-linear-gradient(top, #82d344 0%, #51af34 100%);
+  background: -ms-linear-gradient(top, #82d344 0%, #51af34 100%);
+  background: linear-gradient(top, #82d344 0%, #51af34 100%);
 }
 
 /**
@@ -234,23 +245,228 @@
   height: 100%;
 }
 
-
-.funk-yt-slide {
-      width: 150px;
-      height: 10px;
-      background-color: #ccc;
-      cursor: pointer;
-        display: block;
+/**
+ * Slider Element
+ * (Volume and Progress bar)
+ */
+.funk-yt-controls .funk-yt-slide {
   cursor: pointer;
-  margin: 5px;
+  display: block;
+  cursor: pointer;
   font-size: 24px;
   color: #fff;
   float: left;
   position: relative;
-    }
+}
+.funk-yt-controls .funk-yt-slide.volume {
+  margin-top: 12px;
+  width: 150px;
+  height: 10px;
+  background-color: #ccc;
+}
+.funk-yt-controls .funk-yt-slide.volume .slide-control {
+  background-color: white;
+  height: 10px;
+  /*width: 70%;*/
+}
 
-    .control {
-      background-color: white;
-      height: 10px;
-      width: 70%;
-    }
+/**
+ * Video Quaity
+ */
+.funk-yt-controls .quality {
+  position: relative;
+  /*padding: 8px 12px 8px 8px;*/
+  display: inline-block;
+  vertical-align: baseline;
+  zoom: 1;
+  *display: inline;
+  *vertical-align: auto;
+  margin: 7px;
+}
+.funk-yt-controls .quality .quality-status {
+  font-family: sans-serif;
+  color: #fff;
+  font-size: 10px;
+  border: solid 2px;
+  padding: 2px;
+}
+/*.funk-yt-controls .quality:hover ul {
+  padding: 4px 0 6px;
+  visibility: visible;
+  opacity: 1;
+}*/
+.funk-yt-controls .quality.focused ul {
+  padding: 4px 0 6px;
+  visibility: visible;
+  opacity: 1;
+}
+.funk-yt-controls .quality ul {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  width: 80px;
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  /*bottom: 100%;*/
+  bottom: 30px;
+  left: -50px;
+  right: 0;
+  background: #d9e3fa;
+  border: 1px solid;
+  border-color: #777 #6c6c6c #666;
+  border-radius: 5px;
+  -webkit-transition: 0.2s ease-out;
+  -moz-transition: 0.2s ease-out;
+  -o-transition: 0.2s ease-out;
+  transition: 0.2s ease-out;
+  -webkit-transition-property: opacity, padding, visibility;
+  -moz-transition-property: opacity, padding, visibility;
+  -o-transition-property: opacity, padding, visibility;
+  transition-property: opacity, padding, visibility;
+  background-image: -webkit-linear-gradient(top, #eef3fe, #d9e3fa);
+  background-image: -moz-linear-gradient(top, #eef3fe, #d9e3fa);
+  background-image: -o-linear-gradient(top, #eef3fe, #d9e3fa);
+  background-image: linear-gradient(to bottom, #eef3fe, #d9e3fa);
+  -webkit-box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.funk-yt-controls .quality ul:before, .quality ul:after, .quality li:first-child:after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 50px;
+  width: 0;
+  height: 0;
+  border: 7px outset transparent;
+}
+.funk-yt-controls .quality ul:before {
+  bottom: -14px;
+  border-top: 7px solid #555;
+}
+.funk-yt-controls .quality li:first-child:after {
+  bottom: -13px;
+  border-top: 7px solid white;
+}
+.funk-yt-controls .quality ul:after {
+  bottom: -12px;
+  border-top: 7px solid #d9e3fa;
+}
+.funk-yt-controls .quality li {
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: #838ca2;
+  text-shadow: 0 1px white;
+  list-style: none;
+}
+.funk-yt-controls .quality li.sep {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #b4bbce;
+  -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.6);
+}
+.funk-yt-controls .quality li a {
+  cursor: pointer;
+  display: block;
+  position: relative;
+  margin: 0 -13px;
+  padding: 0 20px 0 12px;
+  color: #313a4f;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.funk-yt-controls .quality li a:hover {
+  color: white;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+  background: #51af34;
+  border-color: #51af34 #42902b #3b8026;
+  background-image: -webkit-linear-gradient(top, #63c844, #489b2e);
+  background-image: -moz-linear-gradient(top, #63c844, #489b2e);
+  background-image: -o-linear-gradient(top, #63c844, #489b2e);
+  background-image: linear-gradient(to bottom, #63c844, #489b2e);
+}
+.funk-yt-controls .quality li a:hover:after {
+  display: block;
+}
+/*.funk-yt-controls .quality li a:after {
+  content: '';
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  margin-top: -4px;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-left-color: #9facd1;
+  border-left-color: rgba(255, 255, 255, 0.4);
+}*/
+
+/**
+ * Loading animation
+ */
+.loader,
+.loader:before,
+.loader:after {
+  background: #ffffff;
+  -webkit-animation: load1 1s infinite ease-in-out;
+  animation: load1 1s infinite ease-in-out;
+  width: 1em;
+  height: 4em;
+}
+.loader:before,
+.loader:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+.loader:before {
+  left: -1.5em;
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+.loader {
+  text-indent: -9999em;
+  /*margin: 88px auto;*/
+  left: 3em;
+  top: 1em;
+  position: relative;
+  font-size: 11px;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+.loader:after {
+  left: 1.5em;
+}
+@-webkit-keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0 #ffffff;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em #ffffff;
+    height: 5em;
+  }
+}
+@keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0 #ffffff;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em #ffffff;
+    height: 5em;
+  }
+}

@@ -52,9 +52,9 @@
 			'CANT_PLAY': 150
 		},
 
-		Bind: undefined,
+		// Bind: undefined,
 
-		Param: undefined
+		// Param: undefined
 		
 	};
 
@@ -79,12 +79,90 @@
 	 */
 	$.funkplayer.defaults = {
 
-		afterReady: function($player) {
+		afterReady: function($player, o) {
+			// default data
+			// var data = {
+			// 	duration: 0,
+			// 	currentTime:0,
+			// 	videoLoadedFraction:0,
+			// 	quality: 'auto',
+			// 	availableQualityLevels: ['auto']
+			// };
+
+			// data = $player.funkplayer('data'); // change data
+			// alert(data.duration);
+
 			// use dynamic action after ready
-			var bind = (typeof(FP.Bind) == 'undefined') ? 'play' : FP.Bind;
-			$player.funkplayer(bind, FP.Param);
+			// var bind = (typeof(FP.Bind) == 'undefined') ? 'play' : FP.Bind;
+			// $player.funkplayer(bind, FP.Param);
 
 			// alert($player.funkplayer('data'));
+			
+			if($player.find('.thumb-play-button').length == 0){
+				$player.append('<div class="thumb-play-button"><div class="loader"></div></div>');
+			} else {
+				$player.find('.thumb-play-button').show();
+			}
+
+			$(FP.getControl($player, o)).appendTo($player);
+
+			$player.find('.funk-yt-button.icon-pause').hide();
+			if($player.funkplayer('isMuted') === false){
+				$player.find('.funk-yt-button.icon-mute').hide();
+				$player.find('.funk-yt-button.icon-unmute').show();
+			} else {
+				$player.find('.funk-yt-button.icon-unmute').hide();
+				$player.find('.funk-yt-button.icon-mute').show();
+			}
+
+			// set current volume status
+			var curVol = $player.funkplayer('volume');
+			$player.find('.funk-yt-slide.volume').find('.slide-control').css('width', curVol+'%');
+			
+			$player.find('.funk-yt-button').on('click', function(){
+				var bind = $(this).attr('data-control'),
+					param = $(this).attr('data-param');
+
+				if(typeof(bind) == 'string'){
+					$player.funkplayer(bind, param);
+				}
+			});
+
+			// fullscreen
+			$player.find('.fullscreen').on('click', function(){
+				var elem = $player.get(0);
+
+				if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+				    $player.addClass('fullscreen');
+
+				    if (elem.requestFullscreen) {
+				      elem.requestFullscreen();
+				    } else if (elem.mozRequestFullScreen) {
+				      elem.mozRequestFullScreen();
+				    } else if (elem.webkitRequestFullscreen) {
+				      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+				    }
+			  	} else {
+			  		$player.removeClass('fullscreen');
+
+				    if (document.cancelFullScreen) {
+				      document.cancelFullScreen();
+				    } else if (document.mozCancelFullScreen) {
+				      document.mozCancelFullScreen();
+				    } else if (document.webkitCancelFullScreen) {
+				      document.webkitCancelFullScreen();
+				    }
+			  	}
+			});
+
+			$( $player ).on({
+		        mouseenter: function () {
+		            $(this).addClass('focused');
+		        },
+		        mouseleave: function () {
+		            $(this).removeClass('focused');
+		        }
+		    });
 
 		}, // args: $player
 		stateChange: function(player) {
@@ -366,10 +444,46 @@
 		return (cur / tot * 100).toFixed(2);
 	};
 
-	var setFill = function(event, controlData) {
-	  var percent = (event.clientX - controlData.cOffset.left) * (100/controlData.cWidth);
-	  return percent;
+	var createQualitylevel = function(available, curQuality){
+		// Create the list element:
+	    var list = document.createElement('ul'),
+	    	current = document.createElement('li');
+
+	    for(var i = 0; i < available.length; i++) {
+	        // Create the list item:
+	        var item = document.createElement('li'),
+	        	link = document.createElement('a');
+
+	       	link.appendChild(document.createTextNode(available[i]));
+	        link.setAttribute("data-quality", available[i]);
+
+	        // Set its contents:
+	        item.appendChild(link);
+
+	        // Add it to the list:
+	        list.appendChild(item);
+	    }
+
+	    current.setAttribute('class', 'sep');
+	    current.appendChild(document.createTextNode(curQuality));
+
+	    list.appendChild(current);
+
+	    // Finally, return the constructed list:
+	    return list;
 	};
+
+	var setFill = function(event, slideEl) {
+          
+        var controlData = {
+            cFill: slideEl.find('.slide-control'),
+            cWidth: slideEl.width(),
+            cOffset: slideEl.offset()
+        };
+
+      var percent = (event.clientX - controlData.cOffset.left) * (100/controlData.cWidth);
+      return percent;
+    };
 
 	var updateOption = function(dataOpt){
 		var optionsarray = dataOpt,
@@ -427,7 +541,7 @@
 			$player.bind(event + FUNKPLAYER, $player, PLAYER[event]);
 
 		// initialize the default event methods o.initialVideo
-		FP.initDefaults($.funkplayer.defaults, o);
+		FP.initDefaults($player, $.funkplayer.defaults, o);
 
 		// get image
 		// width and height might override default_ratio value
@@ -472,66 +586,6 @@
 		//     // data contains the JSON-Object below
 		// });
 
-		// append controls
-		$(FP.getControl($player, o)).appendTo($player);
-
-		// fullscreen
-		$player.find('.fullscreen').on('click', function(){
-			var elem = $player.get(0);
-
-			if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-			    $player.addClass('fullscreen');
-
-			    if (elem.requestFullscreen) {
-			      elem.requestFullscreen();
-			    } else if (elem.mozRequestFullScreen) {
-			      elem.mozRequestFullScreen();
-			    } else if (elem.webkitRequestFullscreen) {
-			      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-			    }
-		  	} else {
-		  		$player.removeClass('fullscreen');
-
-			    if (document.cancelFullScreen) {
-			      document.cancelFullScreen();
-			    } else if (document.mozCancelFullScreen) {
-			      document.mozCancelFullScreen();
-			    } else if (document.webkitCancelFullScreen) {
-			      document.webkitCancelFullScreen();
-			    }
-		  	}
-		});
-
-		$( $player ).hover(
-		  	function() {
-		    	$( this ).addClass('focused');
-		  	}, function() {
-		    	$( this ).removeClass('focused');
-		  	}
-		);
-
-		$player.find('.funk-yt-button').on('click', function(){
-			var bind = $(this).attr('data-control'),
-				param = $(this).attr('data-param');
-
-			if(typeof(bind) == 'string'){
-				if(FP.inited == false){
-					FP.initPlayer($player, o);
-					FP.Bind = bind;
-					FP.Param = param;
-				}
-
-				$player.funkplayer(bind, param);
-
-				// var dt = $player.funkplayer('data');
-				// console.log(dt);
-
-				// if($(this).attr('data-control') == 'play'){
-				// 	$player.funkplayer(bind, param);
-				// }
-			}
-		});
-
 		return $player;
 
 	};
@@ -540,11 +594,11 @@
 		// create controll
 		CONTROL.push('<div class="funk-yt-controls">');
         CONTROL.push('<div class="funk-yt-time-rail">');
-      	CONTROL.push('<span class="funk-yt-time-total">');
+      	CONTROL.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
         CONTROL.push('<span class="funk-yt-time-loaded"></span>');
-		CONTROL.push('<span class="funk-yt-time-current"></span>');
-		CONTROL.push('<span class="funk-yt-time-float" style="display: none; left: 122px;">'); // tooltip time
-		CONTROL.push('<span class="funk-yt-time-float-current">00:16</span>');
+		CONTROL.push('<span class="funk-yt-time-current slide-control"></span>');
+		CONTROL.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
+		CONTROL.push('<span class="funk-yt-time-float-current">00:00</span>');
 		CONTROL.push('<span class="funk-yt-time-float-corner"></span>');
 		CONTROL.push('</span>');
 		CONTROL.push('</span>');
@@ -554,12 +608,13 @@
 		CONTROL.push('<div class="funk-yt-button icon-pause" data-control="pause"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-unmute" data-control="mute"></div>');
 		CONTROL.push('<div class="funk-yt-button icon-mute" data-control="unmute"></div>');
-		CONTROL.push('<div class="funk-yt-slide"><div class="control"></div></div>');
+		CONTROL.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
 		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		CONTROL.push('<div class="funk-yt-button btn-right">');
-		CONTROL.push('<select class="funk-yt-select btn-right quality"><option value="auto">auto</option></select>');
+		CONTROL.push('<div class="btn-right quality">');
+		CONTROL.push('<div class="quality-status"></div>');
+		CONTROL.push('<div class="av-quality"></div>'); // container available quality
 		CONTROL.push('</div>');
 		CONTROL.push('</div>');
 
@@ -612,7 +667,7 @@
 
 				playerVars: {
 
-					'autoplay': 0, // force autoplay false because controled with our custom controls
+					'autoplay': 1, // force autoplay false because controled with our custom controls
 
 					'autohide': 1,
 
@@ -654,7 +709,7 @@
 
 						var $player = $(evt.target.getIframe()).parents("." + FUNKPLAYER_CLASS);
 
-						$.funkplayer.defaults.afterReady($player);
+						$.funkplayer.defaults.afterReady($player, o);
 
 					},
 
@@ -702,24 +757,166 @@
 	 * @param d - the defaults
 	 * @param o - the options w/ methods to attach
 	 */
-	FP.initDefaults = function(d, o) {
+	FP.initDefaults = function($player, d, o) {
 
 		var ID = o.playerID;
 
 		// default onPlayer events
 		var dp = d.onPlayer;
+
+		// default data
+		var data = {
+			duration: 0,
+			currentTime:0,
+			videoLoadedFraction:0,
+			quality: 'auto',
+			availableQualityLevels: ['auto']
+		};
+
 		dp.unstarted[ID] = function(){
-			alert('disii');
 			o.onPlayerUnstarted;
 		};
-		dp.ended[ID] = o.onPlayerEnded;
-		dp.playing[ID] = o.onPlayerPlaying;
-		dp.paused[ID] = o.onPlayerPaused;
-		dp.buffering[ID] = o.onPlayerBuffering;
-		dp.cued[ID] = o.onPlayerCued;
+		dp.ended[ID] = function(){
+			alert('ended');
+			o.onPlayerEnded;
+		};
+		dp.playing[ID] = function(){
+
+			if($player.find('.thumb-play-button').length >= 0){
+				$player.find('.thumb-play-button').hide();
+			}
+
+			$player.find('.funk-yt-button.icon-play').hide();
+			$player.find('.funk-yt-button.icon-pause').show();
+
+			// alert(curQuality);
+			setInterval(function(){
+			   	data = $player.funkplayer('data'); // change data
+			   	$player.find('.current-time').text(convertTime(data.currentTime));
+			   	$player.find('.total-time').text('| '+ convertTime(data.duration));
+				$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
+				$player.find('.funk-yt-time-float').css('left', getPercent(data.currentTime, data.duration)+'%'); // set position of tooltip
+				$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
+			},100); //polling frequency in miliseconds
+
+			// wait data updated
+			setTimeout(function() {
+				var curQuality = $player.funkplayer('quality'),
+					list = createQualitylevel(data.availableQualityLevels, curQuality),
+					elQuality = $player.find('.quality');
+
+				elQuality.find('.quality-status').html(curQuality);	
+				elQuality.find('.av-quality').html(list);
+				
+				elQuality.find('a').on('click', function(){
+					var setQuality = $(this).attr('data-quality'),
+						icon = $(this).attr('data-quality'); // todo change to icon
+					// alert(setQuality);
+					
+					elQuality.removeClass('focused');
+					$player.funkplayer('quality', setQuality);
+
+					elQuality.find('.quality-status').html(setQuality);
+	      			elQuality.find('.sep').html(icon);
+				});
+
+		  	}, 100);
+
+			// progress bar and volume
+			$('.funk-yt-slide').each(function(){
+
+		      var $control = $(this),
+		      	  $bind = $control.attr('data-control'),
+		          $window = $(window);
+
+		      $control.on('mousedown', function() {
+		        $control.on('mousemove', function(){
+
+			        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+			        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+			        // update
+		          	if($bind == 'seek'){
+			        	$player.funkplayer($bind, ( setFill(event, $control) / 100) * data.duration );
+			        } else {
+			        	$player.funkplayer($bind, setFill(event, $control).toFixed());
+			        }
+		        });
+		      });
+
+		      $control.on('click', function(event) {
+
+		        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+		        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+		        // update
+		        if($bind == 'seek'){
+		        	$player.funkplayer($bind, ( setFill(event, $control) / 100) * data.duration );
+		        } else {
+		        	$player.funkplayer($bind, setFill(event, $control).toFixed());
+		        }
+		      });
+
+		      $window.on('mouseup', function(event) {
+		        $control.off('mousemove');
+		      });
+		    });
+
+			$(".quality").on({
+		        mouseenter: function () {
+		            $(this).addClass('focused');
+		        },
+		        mouseleave: function () {
+		            $(this).removeClass('focused');
+		        }
+		    });
+
+			o.onPlayerPlaying;
+		};
+		dp.paused[ID] = function(){
+			// alert('pause');
+			$player.find('.funk-yt-button.icon-pause').hide();
+			$player.find('.funk-yt-button.icon-play').show();
+			o.onPlayerPaused;
+		};
+		dp.buffering[ID] = function(){
+			// alert($player.find('.thumb-play-button').length);
+			if($player.find('.thumb-play-button').length == 0){
+				$player.append('<div class="thumb-play-button"><div class="loader"></div></div>');
+			} else {
+				$player.find('.thumb-play-button').show();
+			}
+			
+			o.onPlayerBuffering;
+		};
+		dp.cued[ID] = function(){
+			alert('cued');
+			o.onPlayerCued;
+		};
 
 		// default onQualityChange
-		d.onQualityChange[ID] = o.onQualityChange;
+		d.onQualityChange[ID] = function(){
+
+			var curQuality = $player.funkplayer('quality'),
+				list = createQualitylevel(data.availableQualityLevels, curQuality),
+				elQuality = $player.find('.quality');
+
+			elQuality.find('.quality-status').html(curQuality);	
+			elQuality.find('.av-quality').html(list);
+
+			elQuality.find('a').on('click', function(){
+				var setQuality = $(this).attr('data-quality'),
+					icon = $(this).attr('data-quality'); // todo change to icon
+				// alert(setQuality);
+				
+				elQuality.removeClass('focused');
+				$player.funkplayer('quality', setQuality);
+
+				elQuality.find('.quality-status').html(setQuality);
+      			elQuality.find('.sep').html(icon);
+			});
+
+			// call user function
+			o.onQualityChange;
+		};
 
 		// default onError events
 		var de = d.onErr;
@@ -744,88 +941,6 @@
 
 		$($player).find('.funk-frame').removeClass('image-loaded').addClass('video-loaded')
 		.css('background-image','');
-
-		FP.syncPlayer($player);
-	};
-
-	/**
-	 * [syncPlayer description]
-	 * @param  {[type]} $player [description]
-	 * @return {[type]}         [description]
-	 */
-	FP.syncPlayer = function($player) {
-		// default data
-		var data = {
-			duration: 0,
-			currentTime:0,
-			videoLoadedFraction:0,
-			quality: 'auto',
-			availableQualityLevels: ['auto']
-		};
-
-		// player time
-		setInterval(function(){
-		   	data = $player.funkplayer('data'); // change data
-		   	$player.find('.current-time').text(convertTime(data.currentTime));
-		   	$player.find('.total-time').text('| '+ convertTime(data.duration));
-			$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
-			// $('#test').html(data.videoLoadedFraction);
-			$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
-			
-			// update quality options
-			if (typeof(data.availableQualityLevels) !== 'undefined' && data.availableQualityLevels.length > 0) {
-				var quality = $player.funkplayer('quality');
-
-				$player.find('.quality').html(updateOption(data.availableQualityLevels)).val(quality)
-				.on('change', function(){
-					var newquality = $(this).val();
-					$player.funkplayer('quality', newquality);
-				});
-				console.log(quality);
-			}
-		},100); //polling frequency in miliseconds
-
-		// progress bar
-		var rail = $player.find('.funk-yt-time-rail');
-		rail.find('.funk-yt-time-total').bind('mousedown', function(elemRail) {
-          var totWidth = rail.find('.funk-yt-time-total').width(),
-              left = elemRail.pageX,
-              timeSeek = (getPercent(left, totWidth) / 100) * data.duration;
-
-          // alert(data.videoLoadedFraction);
-          $player.funkplayer('seek', timeSeek);
-          rail.find('.funk-yt-time-current').css('width', left+'px');
-      	});
-
-      	// try volume
-      	var $control = $player.find('.funk-yt-slide'),
-		    $window = $(window),
-		    controlData = {
-			    cFill: $control.find('.control'),
-			    cWidth: $control.width(),
-			    cOffset: $control.offset()
-			};
-
-		$control.on('mousedown', function() {
-		  $control.on('mousemove', function(){
-		  	controlData.cFill.css('width', setFill(event, controlData) + '%');
-		  	$player.funkplayer('volume', setFill(event, controlData).toFixed());
-		  });
-		});
-
-		$control.on('click', function(event) {
-		  controlData.cFill.css('width', setFill(event, controlData) + '%');
-		  $player.funkplayer('volume', setFill(event, controlData).toFixed());
-		});
-
-		$window.on('mouseup', function(event) {
-		  $control.off('mousemove');
-		});
-
-		// quality
-		$player.find('.quality').html(updateOption(data.availableQualityLevels));
-		// $player.find('.quality').html(data.availableQualityLevels.join(","));
-		// $('#test').html(data.availableQualityLevels.join(","));
 	};
 
 	/**
@@ -895,7 +1010,7 @@
 			url.push("?&enablejsapi=1&version=3");
 			url.push("&playerapiid=" + o.playerID);
 			url.push("&rel=" + (o.showRelated ? 1 : 0));
-			url.push("&autoplay=0");
+			url.push("&autoplay=1");
 			url.push("&autohide=1");
 			url.push("&loop=" + (o.loop ? 1 : 0));
 			url.push("&playlist=" + (o.loop ? o.initialVideo : ""));
@@ -939,7 +1054,7 @@
 
 				var $player = $(player).parents("." + FUNKPLAYER_CLASS);
 
-				$.funkplayer.defaults.afterReady($player);
+				$.funkplayer.defaults.afterReady($player, o);
 
 			};
 
