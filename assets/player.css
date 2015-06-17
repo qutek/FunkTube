@@ -76,7 +76,7 @@
   fill: #1f1f1f;
 }
 
-.lazyYT-image-loaded:hover .thumb-play-button-svg,
+.image-loaded:hover .thumb-play-button-svg,
 .thumb-play-button:focus .thumb-play-button-svg {
   opacity: 1;
   fill: #cc181e;
@@ -126,6 +126,16 @@
 }
 
 /**
+ * Control visibility (do it with js)
+ */
+/*.funk-yt-controls.playing .funk-yt-button.btn-play {
+  display: none;
+}
+.funk-yt-controls.paused .funk-yt-button.btn-pause {
+  display: none;
+}*/
+
+/**
  * Controls Buttons
  */
 .funk-yt-controls .funk-yt-button {
@@ -140,8 +150,9 @@
 .funk-yt-controls .funk-yt-info {
   font-family: sans-serif;
   display: block;
-  margin: 5px;
-  font-size: 22px;
+  margin-left: 10px;
+  margin-top: 6px;
+  font-size: 18px;
   color: #fff;
   float: left;
   position: relative;
@@ -205,7 +216,6 @@
   height: 23px;
   top: -26px;
   margin-left: -17px;
-  background: url(tooltip.png);
 }
 .funk-player.focused .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float {
   display: block;
@@ -222,9 +232,22 @@
   font-weight: bold;
   color: #666666;
   text-align: center;
+  background-color: #fff;
+  height: 14px;
+  border-radius: 3px;
+  width: 50px;
 }
-
-.funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-corner { display: none; }
+.funk-yt-controls .funk-yt-time-rail .funk-yt-time-float-current:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-width: 7px;
+  border-style: solid;
+  border-color: #FFFFFF transparent transparent transparent;
+  top: 12px;
+  right: 18px;
+}
 
 /* Green Gradient (for progress and volume bar) */
 .funk-yt-controls .funk-yt-time-rail .funk-yt-time-current,
@@ -410,6 +433,22 @@
 /**
  * Loading animation
  */
+.funk-player .preloader-container.hide {
+  display: none;
+}
+.funk-player .preloader-container {
+  position: absolute;
+  top: 50% !important;
+  left: 50% !important;
+  width: 86px !important;
+  height: 60px !important;
+  padding: 0 !important;
+  margin: -29px 0 0 -38px !important;
+  font-size: normal !important;
+  font-weight: normal !important;
+  line-height: 1 !important;
+  opacity: .9;
+}
 .loader,
 .loader:before,
 .loader:after {
@@ -430,7 +469,7 @@
   -webkit-animation-delay: -0.32s;
   animation-delay: -0.32s;
 }
-.loader {
+.funk-player .loader {
   text-indent: -9999em;
   /*margin: 88px auto;*/
   left: 3em;

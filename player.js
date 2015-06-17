@@ -52,6 +52,15 @@
 			'CANT_PLAY': 150
 		},
 
+		PlayerStatus: {
+			'-1': 'unstarted',
+			'0': 'ended',
+			'1': 'playing',
+			'2': 'paused',
+			'3': 'buffering',
+			'5': 'cued' 
+		}
+
 		// Bind: undefined,
 
 		// Param: undefined
@@ -80,39 +89,15 @@
 	$.funkplayer.defaults = {
 
 		afterReady: function($player, o) {
-			// default data
-			// var data = {
-			// 	duration: 0,
-			// 	currentTime:0,
-			// 	videoLoadedFraction:0,
-			// 	quality: 'auto',
-			// 	availableQualityLevels: ['auto']
-			// };
-
-			// data = $player.funkplayer('data'); // change data
-			// alert(data.duration);
-
-			// use dynamic action after ready
-			// var bind = (typeof(FP.Bind) == 'undefined') ? 'play' : FP.Bind;
-			// $player.funkplayer(bind, FP.Param);
 
 			// alert($player.funkplayer('data'));
-			
-			if($player.find('.thumb-play-button').length == 0){
-				$player.append('<div class="thumb-play-button"><div class="loader"></div></div>');
-			} else {
-				$player.find('.thumb-play-button').show();
-			}
 
 			$(FP.getControl($player, o)).appendTo($player);
 
-			$player.find('.funk-yt-button.icon-pause').hide();
-			if($player.funkplayer('isMuted') === false){
-				$player.find('.funk-yt-button.icon-mute').hide();
-				$player.find('.funk-yt-button.icon-unmute').show();
+			if($player.funkplayer('isMuted')){
+				$player.find('.btn-mute').hide();
 			} else {
-				$player.find('.funk-yt-button.icon-unmute').hide();
-				$player.find('.funk-yt-button.icon-mute').show();
+				$player.find('.btn-unmute').hide();
 			}
 
 			// set current volume status
@@ -133,25 +118,9 @@
 				var elem = $player.get(0);
 
 				if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-				    $player.addClass('fullscreen');
-
-				    if (elem.requestFullscreen) {
-				      elem.requestFullscreen();
-				    } else if (elem.mozRequestFullScreen) {
-				      elem.mozRequestFullScreen();
-				    } else if (elem.webkitRequestFullscreen) {
-				      elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-				    }
+				    launchIntoFullscreen(elem);
 			  	} else {
-			  		$player.removeClass('fullscreen');
-
-				    if (document.cancelFullScreen) {
-				      document.cancelFullScreen();
-				    } else if (document.mozCancelFullScreen) {
-				      document.mozCancelFullScreen();
-				    } else if (document.webkitCancelFullScreen) {
-				      document.webkitCancelFullScreen();
-				    }
+			  		exitFullscreen(elem);
 			  	}
 			});
 
@@ -178,6 +147,14 @@
 				}
 
 				// alert(state);
+				// alert(FP.PlayerStatus[state]);
+				_player.find('.funk-yt-controls').attr('class', 'funk-yt-controls '+FP.PlayerStatus[state]);
+				// control preloader
+				if(state == FP.State.BUFFERING){
+					_player.find('.preloader-container').removeClass('hide');
+				} else {
+					_player.find('.preloader-container').addClass('hide');
+				}
 
 				switch (state) {
 
@@ -496,6 +473,32 @@
 		return seloption;
 	};
 
+	var launchIntoFullscreen = function(element) {
+	  	if(element.requestFullscreen) {
+	    	element.requestFullscreen();
+	  	} else if(element.mozRequestFullScreen) {
+	    	element.mozRequestFullScreen();
+	  	} else if(element.webkitRequestFullscreen) {
+	    	element.webkitRequestFullscreen();
+	  	} else if(element.msRequestFullscreen) {
+	    	element.msRequestFullscreen();
+	  	}
+
+		$(element).addClass('fullscreen');
+	};
+
+	var exitFullscreen = function(element) {
+	  	if(document.exitFullscreen) {
+	    	document.exitFullscreen();
+	  	} else if(document.mozCancelFullScreen) {
+	    	document.mozCancelFullScreen();
+	  	} else if(document.webkitExitFullscreen) {
+	    	document.webkitExitFullscreen();
+	  	}
+
+	  	$(element).removeClass('fullscreen');
+	}
+
 	/**
 	 * Public method to get all the player instances
 	 */
@@ -592,22 +595,22 @@
 
 	FP.getControl = function($player, o){
 		// create controll
+		CONTROL.push('<div class="preloader-container"><div class="loader"></div></div>');
 		CONTROL.push('<div class="funk-yt-controls">');
         CONTROL.push('<div class="funk-yt-time-rail">');
       	CONTROL.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
         CONTROL.push('<span class="funk-yt-time-loaded"></span>');
 		CONTROL.push('<span class="funk-yt-time-current slide-control"></span>');
 		CONTROL.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
-		CONTROL.push('<span class="funk-yt-time-float-current">00:00</span>');
-		CONTROL.push('<span class="funk-yt-time-float-corner"></span>');
+		CONTROL.push('<span class="funk-yt-time-float-current"></span>');
 		CONTROL.push('</span>');
 		CONTROL.push('</span>');
 		CONTROL.push('</div>');
 
-		CONTROL.push('<div class="funk-yt-button icon-play" data-control="play"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-pause" data-control="pause"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-unmute" data-control="mute"></div>');
-		CONTROL.push('<div class="funk-yt-button icon-mute" data-control="unmute"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
+		CONTROL.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
 		CONTROL.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
 		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
@@ -774,20 +777,19 @@
 		};
 
 		dp.unstarted[ID] = function(){
+			$player.find('.btn-stop').hide();
+			$player.find('.btn-play').show();
 			o.onPlayerUnstarted;
 		};
 		dp.ended[ID] = function(){
-			alert('ended');
+			$player.find('.btn-stop').hide();
+			$player.find('.btn-play').show();
 			o.onPlayerEnded;
 		};
 		dp.playing[ID] = function(){
 
-			if($player.find('.thumb-play-button').length >= 0){
-				$player.find('.thumb-play-button').hide();
-			}
-
-			$player.find('.funk-yt-button.icon-play').hide();
-			$player.find('.funk-yt-button.icon-pause').show();
+			$player.find('.btn-play').hide();
+			$player.find('.btn-pause').show();
 
 			// alert(curQuality);
 			setInterval(function(){
@@ -797,6 +799,7 @@
 				$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
 				$player.find('.funk-yt-time-float').css('left', getPercent(data.currentTime, data.duration)+'%'); // set position of tooltip
 				$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
+			   	$player.find('.funk-yt-time-float-current').text(convertTime(data.currentTime));
 			},100); //polling frequency in miliseconds
 
 			// wait data updated
@@ -872,23 +875,20 @@
 			o.onPlayerPlaying;
 		};
 		dp.paused[ID] = function(){
-			// alert('pause');
-			$player.find('.funk-yt-button.icon-pause').hide();
-			$player.find('.funk-yt-button.icon-play').show();
+
+			$player.find('.btn-pause').hide();
+			$player.find('.btn-play').show();
+
 			o.onPlayerPaused;
 		};
 		dp.buffering[ID] = function(){
-			// alert($player.find('.thumb-play-button').length);
-			if($player.find('.thumb-play-button').length == 0){
-				$player.append('<div class="thumb-play-button"><div class="loader"></div></div>');
-			} else {
-				$player.find('.thumb-play-button').show();
-			}
+
+			$player.find('.preloader-container').removeClass('hide');
 			
 			o.onPlayerBuffering;
 		};
 		dp.cued[ID] = function(){
-			alert('cued');
+			// alert('cued');
 			o.onPlayerCued;
 		};
 
@@ -1148,6 +1148,9 @@
 
 			p.$player.attr("data-prev-mute-volume", p.ytplayer.getVolume());
 
+			p.$player.find('.btn-mute').hide();
+			p.$player.find('.btn-unmute').show();
+
 			p.ytplayer.mute();
 
 			p.opts.onMute(p);
@@ -1160,6 +1163,9 @@
 
 			p.ytplayer.setVolume((p.$player.attr("data-prev-mute-volume") || 50));
 
+			p.$player.find('.btn-unmute').hide();
+			p.$player.find('.btn-mute').show();
+			
 			p.opts.onUnMute();
 
 		}),
@@ -1284,12 +1290,6 @@
 			$(p.ytplayer).remove();
 
 			return null;
-
-		}),
-
-		anu: wrap_fn(function(evt, param, p) {
-
-			return alert('ok');
 
 		}),
 
