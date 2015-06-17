@@ -1,5 +1,5 @@
 /**
- * jQuery FunkPlayer (Youtube Custom Player) - v1.0
+ * jQuery FunkTube (Youtube Custom Player) - v1.0
  * Youtube embed with lazy load iframe and custom player style
  * based on https://github.com/nirvanatikku/jQuery-TubePlayer-Plugin
  * Copyright (c) 2015 lafif Astahdziq
@@ -11,11 +11,11 @@
 	/**
 	 * var
 	 */
-	var FUNKPLAYER = ".funkplayer",
+	var FUNKTUBE = ".funktube",
 
-		FUNKPLAYER_CLASS = "funk-player",
+		FUNKTUBE_CLASS = "funk-tube",
 
-		OPTS = "opts" + FUNKPLAYER,
+		OPTS = "opts" + FUNKTUBE,
 
 		CONTROL = [],
 
@@ -25,7 +25,7 @@
 	 * package
 	 * @type {Object}
 	 */
-	var FP = {
+	var FT = {
 		
 		inited: false,				// player status
 		
@@ -70,11 +70,11 @@
 	/**
 	 * public facing defaults
 	 */
-	$.funkplayer = {
+	$.funktube = {
 		
 		events: {},				// events cache -- used by flashplayer version of video player
 		
-		FunkPlayer: FP			// reference to the internal FunkPlayer object. primarily exposed for testing.
+		FunkTube: FT			// reference to the internal FunkTube object. primarily exposed for testing.
 		
 	};
 
@@ -86,22 +86,22 @@
 	 * internally - stateChange, onError, qualityChange. Change them at your
 	 * own risk.
 	 */
-	$.funkplayer.defaults = {
+	$.funktube.defaults = {
 
 		afterReady: function($player, o) {
 
-			// alert($player.funkplayer('data'));
+			// alert($player.funktube('data'));
 
-			$(FP.getControl($player, o)).appendTo($player);
+			$(FT.getControl($player, o)).appendTo($player);
 
-			if($player.funkplayer('isMuted')){
+			if($player.funktube('isMuted')){
 				$player.find('.btn-mute').hide();
 			} else {
 				$player.find('.btn-unmute').hide();
 			}
 
 			// set current volume status
-			var curVol = $player.funkplayer('volume');
+			var curVol = $player.funktube('volume');
 			$player.find('.funk-yt-slide.volume').find('.slide-control').css('width', curVol+'%');
 			
 			$player.find('.funk-yt-button').on('click', function(){
@@ -109,7 +109,7 @@
 					param = $(this).attr('data-param');
 
 				if(typeof(bind) == 'string'){
-					$player.funkplayer(bind, param);
+					$player.funktube(bind, param);
 				}
 			});
 
@@ -147,10 +147,10 @@
 				}
 
 				// alert(state);
-				// alert(FP.PlayerStatus[state]);
-				_player.find('.funk-yt-controls').attr('class', 'funk-yt-controls '+FP.PlayerStatus[state]);
+				// alert(FT.PlayerStatus[state]);
+				_player.find('.funk-yt-controls').attr('class', 'funk-yt-controls '+FT.PlayerStatus[state]);
 				// control preloader
-				if(state == FP.State.BUFFERING){
+				if(state == FT.State.BUFFERING){
 					_player.find('.preloader-container').removeClass('hide');
 				} else {
 					_player.find('.preloader-container').addClass('hide');
@@ -158,22 +158,22 @@
 
 				switch (state) {
 
-				case FP.State.UNSTARTED:
+				case FT.State.UNSTARTED:
 					return _ret.unstarted[player].call(_player);
 
-				case FP.State.ENDED:
+				case FT.State.ENDED:
 					return _ret.ended[player].call(_player);
 
-				case FP.State.PLAYING:
+				case FT.State.PLAYING:
 					return _ret.playing[player].call(_player);
 
-				case FP.State.PAUSED:
+				case FT.State.PAUSED:
 					return _ret.paused[player].call(_player);
 
-				case FP.State.BUFFERING:
+				case FT.State.BUFFERING:
 					return _ret.buffering[player].call(_player);
 
-				case FP.State.CUED:
+				case FT.State.CUED:
 					return _ret.cued[player].call(_player);
 
 				default:
@@ -198,15 +198,15 @@
 
 				switch (errorCode) {
 
-				case FP.Error.BAD_INIT:
-				case FP.Error.INVALID_PARAM:
+				case FT.Error.BAD_INIT:
+				case FT.Error.INVALID_PARAM:
 					return _ret.invalidParameter[player].call(_player);
 
-				case FP.Error.NOT_FOUND:
+				case FT.Error.NOT_FOUND:
 					return _ret.notFound[player].call(_player);
 
-				case FP.Error.NOT_EMBEDDABLE:
-				case FP.Error.CANT_PLAY:
+				case FT.Error.NOT_EMBEDDABLE:
+				case FT.Error.CANT_PLAY:
 					return _ret.notEmbeddable[player].call(_player);
 
 				default:
@@ -257,7 +257,7 @@
 	};
 
 	/**
-	 * These are the internal defaults for the FunkPlayer
+	 * These are the internal defaults for the FunkTube
 	 * plugin to work without providing any parameters. They
 	 * are merged with the users options.
 	 */
@@ -293,12 +293,12 @@
 		// by default, we will attempt to load the swfobject script, if utilizing the flash player
 		// privately used
 		allowScriptAccess: "always",
-		playerID: "funkplayer-container",
+		playerID: "funktube-container",
 
 		// html5 specific attrs
 		iframed: true,
 
-		// functions called when events are triggered by using the funkplayer interface
+		// functions called when events are triggered by using the funktube interface
 		onPlay: function() {}, // arg: id
 		onPause: function() {},
 		onStop: function() {},
@@ -324,11 +324,11 @@
 	};
 
 	/**
-	 * The FunkPlayer plugin bound to the jQuery object's prototype.
-	 * This method acts as an interface to instantiate a FunkPlayer,
+	 * The FunkTube plugin bound to the jQuery object's prototype.
+	 * This method acts as an interface to instantiate a FunkTube,
 	 * as well as invoke events that are attached - typically getters/setters
 	 */
-	$.fn.funkplayer = function(input, xtra) {
+	$.fn.funktube = function(input, xtra) {
 
 		var $this = $(this);
 
@@ -338,13 +338,13 @@
 
 			return $this.each(function() {
 
-				FP.init($(this), input);
+				FT.init($(this), input);
 
 			});
 
 		} else if (type === "string") {
 
-			return $this.triggerHandler(input + FUNKPLAYER, (typeof xtra !== 'undefined' ? xtra : null));
+			return $this.triggerHandler(input + FUNKTUBE, (typeof xtra !== 'undefined' ? xtra : null));
 		
 		}
 
@@ -353,13 +353,13 @@
 
 	/**
 	 * This method is the base method for all the events
-	 * that are bound to the FunkPlayer.
+	 * that are bound to the FunkTube.
 	 */
 	var wrap_fn = function(fn) {
 
 		return function(evt, param) {
 
-			var p = FP.getPkg(evt);
+			var p = FT.getPkg(evt);
 
 			if (p.ytplayer) {
 
@@ -502,9 +502,9 @@
 	/**
 	 * Public method to get all the player instances
 	 */
-	$.funkplayer.getPlayers = function() {
+	$.funktube.getPlayers = function() {
 
-		return FP.ytplayers;
+		return FT.ytplayers;
 
 	};
 
@@ -512,9 +512,9 @@
 	/**
 	 * Initialize a YouTube player;
 	 *
-	 *	First check to see if FunkPlayer has been init'd
+	 *	First check to see if FunkTube has been init'd
 	 *	if it has then return, otherwise:
-	 *		> add the funkplayer class (used to denote a player)
+	 *		> add the funktube class (used to denote a player)
 	 *		> provide local data access to the options and store it
 	 *		> initialize the default events on the jQuery instance
 	 *		> create the container for the player
@@ -523,9 +523,9 @@
 	 *	@param $player - the instance being created on
 	 *	@param opts - the user's options
 	 */
-	FP.init = function($player, opts) {
+	FT.init = function($player, opts) {
 
-		if ($player.hasClass(FUNKPLAYER_CLASS)) return $player;
+		if ($player.hasClass(FUNKTUBE_CLASS)) return $player;
 
 		var o = $.extend({}, defaults, opts);
 
@@ -538,13 +538,13 @@
 
 		// alert(o.initialVideo);
 
-		$player.addClass(FUNKPLAYER_CLASS).data(OPTS, o);
+		$player.addClass(FUNKTUBE_CLASS).data(OPTS, o);
 
 		for (var event in PLAYER)
-			$player.bind(event + FUNKPLAYER, $player, PLAYER[event]);
+			$player.bind(event + FUNKTUBE, $player, PLAYER[event]);
 
 		// initialize the default event methods o.initialVideo
-		FP.initDefaults($player, $.funkplayer.defaults, o);
+		FT.initDefaults($player, $.funktube.defaults, o);
 
 		// get image
 		// width and height might override default_ratio value
@@ -579,7 +579,7 @@
         }).addClass('image-loaded')
         .on('click', function(){
 			//append the player into the container on click
-			FP.initPlayer($player, o);
+			FT.initPlayer($player, o);
 		})
 		.html(playThumbnail.join(''))
 		.appendTo($player);
@@ -593,7 +593,7 @@
 
 	};
 
-	FP.getControl = function($player, o){
+	FT.getControl = function($player, o){
 		// create controll
 		CONTROL.push('<div class="preloader-container"><div class="loader"></div></div>');
 		CONTROL.push('<div class="funk-yt-controls">');
@@ -628,13 +628,13 @@
 	/**
 	 * Every method needs these items
 	 */
-	FP.getPkg = function(evt) {
+	FT.getPkg = function(evt) {
 
 		var $player = evt.data;
 
 		var opts = $player.data(OPTS);
 
-		var ytplayer = FP.ytplayers[opts.playerID];
+		var ytplayer = FT.ytplayers[opts.playerID];
 
 		return {
 
@@ -656,9 +656,9 @@
 	 * If the script has been init'd, we automatically
 	 * pop the method off the queue and init the player.
 	 */
-	FP.iframeReady = function(o) {
+	FT.iframeReady = function(o) {
 
-		FP.inits.push(function() {
+		FT.inits.push(function() {
 
 			new YT.Player(o.playerID, {
 
@@ -708,19 +708,19 @@
 
 					'onReady': function(evt) {
 
-						FP.ytplayers[o.playerID] = evt.target;
+						FT.ytplayers[o.playerID] = evt.target;
 
-						var $player = $(evt.target.getIframe()).parents("." + FUNKPLAYER_CLASS);
+						var $player = $(evt.target.getIframe()).parents("." + FUNKTUBE_CLASS);
 
-						$.funkplayer.defaults.afterReady($player, o);
+						$.funktube.defaults.afterReady($player, o);
 
 					},
 
-					'onPlaybackQualityChange': $.funkplayer.defaults.qualityChange(o.playerID),
+					'onPlaybackQualityChange': $.funktube.defaults.qualityChange(o.playerID),
 
-					'onStateChange': $.funkplayer.defaults.stateChange(o.playerID),
+					'onStateChange': $.funktube.defaults.stateChange(o.playerID),
 
-					'onError': $.funkplayer.defaults.onError(o.playerID)
+					'onError': $.funktube.defaults.onError(o.playerID)
 
 				}
 
@@ -729,26 +729,26 @@
 		});
 
 		// stacked init method
-		if (FP.inits.length >= 1 && !FP.inited) {
+		if (FT.inits.length >= 1 && !FT.inited) {
 
 			return function() {
 
-				for (var i = 0; i < FP.inits.length; i++) {
+				for (var i = 0; i < FT.inits.length; i++) {
 
-					FP.inits[i]();
+					FT.inits[i]();
 
 				}
 
-				FP.inited = true;
+				FT.inited = true;
 
 			};
 
 		}
 
 		// if we've inited already, just call the init fn
-		if (FP.inited) {
+		if (FT.inited) {
 
-			(FP.inits.pop())();
+			(FT.inits.pop())();
 
 		}
 
@@ -760,7 +760,7 @@
 	 * @param d - the defaults
 	 * @param o - the options w/ methods to attach
 	 */
-	FP.initDefaults = function($player, d, o) {
+	FT.initDefaults = function($player, d, o) {
 
 		var ID = o.playerID;
 
@@ -793,7 +793,7 @@
 
 			// alert(curQuality);
 			setInterval(function(){
-			   	data = $player.funkplayer('data'); // change data
+			   	data = $player.funktube('data'); // change data
 			   	$player.find('.current-time').text(convertTime(data.currentTime));
 			   	$player.find('.total-time').text('| '+ convertTime(data.duration));
 				$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
@@ -804,7 +804,7 @@
 
 			// wait data updated
 			setTimeout(function() {
-				var curQuality = $player.funkplayer('quality'),
+				var curQuality = $player.funktube('quality'),
 					list = createQualitylevel(data.availableQualityLevels, curQuality),
 					elQuality = $player.find('.quality');
 
@@ -817,7 +817,7 @@
 					// alert(setQuality);
 					
 					elQuality.removeClass('focused');
-					$player.funkplayer('quality', setQuality);
+					$player.funktube('quality', setQuality);
 
 					elQuality.find('.quality-status').html(setQuality);
 	      			elQuality.find('.sep').html(icon);
@@ -839,9 +839,9 @@
 			        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
 			        // update
 		          	if($bind == 'seek'){
-			        	$player.funkplayer($bind, ( setFill(event, $control) / 100) * data.duration );
+			        	$player.funktube($bind, ( setFill(event, $control) / 100) * data.duration );
 			        } else {
-			        	$player.funkplayer($bind, setFill(event, $control).toFixed());
+			        	$player.funktube($bind, setFill(event, $control).toFixed());
 			        }
 		        });
 		      });
@@ -852,9 +852,9 @@
 		        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
 		        // update
 		        if($bind == 'seek'){
-		        	$player.funkplayer($bind, ( setFill(event, $control) / 100) * data.duration );
+		        	$player.funktube($bind, ( setFill(event, $control) / 100) * data.duration );
 		        } else {
-		        	$player.funkplayer($bind, setFill(event, $control).toFixed());
+		        	$player.funktube($bind, setFill(event, $control).toFixed());
 		        }
 		      });
 
@@ -895,7 +895,7 @@
 		// default onQualityChange
 		d.onQualityChange[ID] = function(){
 
-			var curQuality = $player.funkplayer('quality'),
+			var curQuality = $player.funktube('quality'),
 				list = createQualitylevel(data.availableQualityLevels, curQuality),
 				elQuality = $player.find('.quality');
 
@@ -908,7 +908,7 @@
 				// alert(setQuality);
 				
 				elQuality.removeClass('focused');
-				$player.funkplayer('quality', setQuality);
+				$player.funktube('quality', setQuality);
 
 				elQuality.find('.quality-status').html(setQuality);
       			elQuality.find('.sep').html(icon);
@@ -930,14 +930,14 @@
 	/**
 	 * init the iframed option if its requested and supported
 	 * otherwise initialize the flash based player
-	 * @param $player - the player that the funkplayer binds to
+	 * @param $player - the player that the funktube binds to
 	 * @param o - the init options
 	 */
-	FP.initPlayer = function($player, o) {
+	FT.initPlayer = function($player, o) {
 
-		if (o.iframed) FP.initIframePlayer($player, o);
+		if (o.iframed) FT.initIframePlayer($player, o);
 
-		else FP.initFlashPlayer($player, o);
+		else FT.initFlashPlayer($player, o);
 
 		$($player).find('.funk-frame').removeClass('image-loaded').addClass('video-loaded')
 		.css('background-image','');
@@ -946,9 +946,9 @@
 	/**
 	 * Initialize an iframe player
 	 */
-	FP.initIframePlayer = function($player, o) {
+	FT.initIframePlayer = function($player, o) {
 
-		if (!FP.iframeScriptInited) {
+		if (!FT.iframeScriptInited) {
 
 			// write the api script tag
 			var tag = document.createElement('script');
@@ -959,12 +959,12 @@
 
 			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-			FP.iframeScriptInited = true;
+			FT.iframeScriptInited = true;
 
 		}
 
 		// init the iframe player
-		window.onYouTubePlayerAPIReady = FP.iframeReady(o);
+		window.onYouTubePlayerAPIReady = FT.iframeReady(o);
 
 	};
 
@@ -973,10 +973,10 @@
 	 *  -> if 'loadSWFObject' is set to true, player will only be init'd
 	 *      when the swfobject script request has completed successfully
 	 *  -> if 'loadSWFObject' is set to false, assumes that you have
-	 *      imported your own SWFObject, prior to FunkPlayer's initialization
+	 *      imported your own SWFObject, prior to FunkTube's initialization
 	 * @imports swfobject automatically
 	 */
-	FP.initFlashPlayer = function($player, o) {
+	FT.initFlashPlayer = function($player, o) {
 
 		if (o.loadSWFObject) {
 
@@ -985,17 +985,17 @@
 			o.swfobjectURL = o.swfobjectURL.replace('https://', '');
 			o.swfobjectURL = o.protocol + '://' + o.swfobjectURL;
 
-			$.getScript(o.swfobjectURL, FP.init_flash_player(o));
+			$.getScript(o.swfobjectURL, FT.init_flash_player(o));
 
 		} else {
 
-			FP.init_flash_player(o)();
+			FT.init_flash_player(o)();
 
 		}
 
 	};
 
-	FP.init_flash_player = function(o) {
+	FT.init_flash_player = function(o) {
 
 		return function() {
 			
@@ -1039,22 +1039,22 @@
 
 				var pid = playerId.replace(/-/g, '');
 
-				var d = $.funkplayer.defaults;
-				$.funkplayer.events[pid] = {
+				var d = $.funktube.defaults;
+				$.funktube.events[pid] = {
 					"stateChange": d.stateChange(playerId),
 					"error": d.onError(playerId),
 					"qualityChange": d.qualityChange(playerId)
 				};
 
-				player.addEventListener("onStateChange", "$.funkplayer.events." + pid + ".stateChange");
-				player.addEventListener("onError", "$.funkplayer.events." + pid + ".error");
-				player.addEventListener("onPlaybackQualityChange", "$.funkplayer.events." + pid + ".qualityChange");
+				player.addEventListener("onStateChange", "$.funktube.events." + pid + ".stateChange");
+				player.addEventListener("onError", "$.funktube.events." + pid + ".error");
+				player.addEventListener("onPlaybackQualityChange", "$.funktube.events." + pid + ".qualityChange");
 
-				FP.ytplayers[playerId] = player;
+				FT.ytplayers[playerId] = player;
 
-				var $player = $(player).parents("." + FUNKPLAYER_CLASS);
+				var $player = $(player).parents("." + FUNKTUBE_CLASS);
 
-				$.funkplayer.defaults.afterReady($player, o);
+				$.funktube.defaults.afterReady($player, o);
 
 			};
 
@@ -1063,7 +1063,7 @@
 	};
 
 	// fmt: youtube.com/watch?x=[anything]&v=[desired-token]&
-	FP.getVideoIDFromURL = function(sURL) {
+	FT.getVideoIDFromURL = function(sURL) {
 
 		sURL = sURL || ""; // make sure it's a string; sometimes the YT player API returns undefined, and then indexOf() below will fail
 		var qryParamsStart = sURL.indexOf("?");
@@ -1084,7 +1084,7 @@
 	};
 
 	/**
-	 * All the events that are bound to a FunkPlayer instance
+	 * All the events that are bound to a FunkTube instance
 	 */
 	var PLAYER = {
 		
@@ -1232,7 +1232,7 @@
 
 			ret.videoEmbedCode = P.getVideoEmbedCode();
 
-			ret.videoID = FP.getVideoIDFromURL(ret.videoURL);
+			ret.videoID = FT.getVideoIDFromURL(ret.videoURL);
 
 			ret.availableQualityLevels = P.getAvailableQualityLevels();
 			
@@ -1244,7 +1244,7 @@
 
 		videoId: wrap_fn(function(evt, param, p) {
 
-			return FP.getVideoIDFromURL(p.ytplayer.getVideoUrl());
+			return FT.getVideoIDFromURL(p.ytplayer.getVideoUrl());
 
 		}),
 
@@ -1262,12 +1262,12 @@
 
 		destroy: wrap_fn(function(evt, param, p) {
 			
-			p.$player.removeClass(FUNKPLAYER_CLASS).data(OPTS, null).unbind(FUNKPLAYER).html("");
+			p.$player.removeClass(FUNKTUBE_CLASS).data(OPTS, null).unbind(FUNKTUBE).html("");
 
-			delete FP.ytplayers[p.opts.playerID];
+			delete FT.ytplayers[p.opts.playerID];
 
 			// cleanup callback handler references..
-			var d = $.funkplayer.defaults;
+			var d = $.funktube.defaults;
 
 			var events = ['unstarted', 'ended', 'playing', 'paused', 'buffering', 'cued'];
 
@@ -1282,7 +1282,7 @@
 
 			delete d.onQualityChange[p.opts.playerID];
 
-			delete $.funkplayer.events[p.opts.playerID]; // flash callback ref's
+			delete $.funktube.events[p.opts.playerID]; // flash callback ref's
 			if ('destroy' in p.ytplayer) {
 				p.ytplayer.destroy();
 			}
