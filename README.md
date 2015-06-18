@@ -29,3 +29,4 @@ Please check out the simple example [here](https://github.com/qutek/FunkTube/blo
 ## Credits ##
 This plugin inspired from the jQuery-TubePlayer-Plugin by [tikku.com](http://tikku.com/)
 
+## It’s Not Done, Yet ##
