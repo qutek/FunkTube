@@ -23,8 +23,6 @@
 	//
 	//
 	var FT = {
-		
-		IdVideo: 'DkoeNLuMbcI',		// video id
 
 		inited: false,				// funktube inited flag - for destroy/re-init
 		
@@ -41,6 +39,14 @@
 			quality: 'auto',
 			availableQualityLevels: ['auto']
 		},
+
+		fullScreenApi: {
+            supportsFullScreen: false,
+            fullScreenEventName: '',
+            prefix: ''
+        },
+
+        browserPrefixes: 'webkit moz o ms khtml'.split(' '),
 		
 		inits: [],					// local init functions for multiple iframe players
 		
@@ -217,7 +223,7 @@
 		ratio: '16:9',
 		useThumb: true,
 		allowFullScreen: "true",
-		// initialVideo: "DkoeNLuMbcI",
+		initialVideo: undefined,
 		start: 0,
 		preferredQuality: "auto",
 		showControls: false,
@@ -365,35 +371,6 @@
 		return (cur / tot * 100).toFixed(2);
 	};
 
-	var createQualitylevel = function(available, curQuality){
-		// Create the list element:
-	    var list = document.createElement('ul'),
-	    	current = document.createElement('li');
-
-	    for(var i = 0; i < available.length; i++) {
-	        // Create the list item:
-	        var item = document.createElement('li'),
-	        	link = document.createElement('a');
-
-	       	link.appendChild(document.createTextNode(available[i]));
-	        link.setAttribute("data-quality", available[i]);
-
-	        // Set its contents:
-	        item.appendChild(link);
-
-	        // Add it to the list:
-	        list.appendChild(item);
-	    }
-
-	    current.setAttribute('class', 'sep');
-	    current.appendChild(document.createTextNode(curQuality));
-
-	    list.appendChild(current);
-
-	    // Finally, return the constructed list:
-	    return list;
-	};
-
 	var setFill = function(event, slideEl) {
           
         var controlData = {
@@ -417,31 +394,31 @@
 		return seloption;
 	};
 
-	var launchIntoFullscreen = function(element) {
-	  	if(element.requestFullscreen) {
-	    	element.requestFullscreen();
-	  	} else if(element.mozRequestFullScreen) {
-	    	element.mozRequestFullScreen();
-	  	} else if(element.webkitRequestFullscreen) {
-	    	element.webkitRequestFullscreen();
-	  	} else if(element.msRequestFullscreen) {
-	    	element.msRequestFullscreen();
-	  	}
+	// var launchIntoFullscreen = function(element) {
+	//   	if(element.requestFullscreen) {
+	//     	element.requestFullscreen();
+	//   	} else if(element.mozRequestFullScreen) {
+	//     	element.mozRequestFullScreen();
+	//   	} else if(element.webkitRequestFullscreen) {
+	//     	element.webkitRequestFullscreen();
+	//   	} else if(element.msRequestFullscreen) {
+	//     	element.msRequestFullscreen();
+	//   	}
 
-		$(element).addClass('fullscreen');
-	};
+	// 	$(element).addClass('fullscreen');
+	// };
 
-	var exitFullscreen = function(element) {
-	  	if(document.exitFullscreen) {
-	    	document.exitFullscreen();
-	  	} else if(document.mozCancelFullScreen) {
-	    	document.mozCancelFullScreen();
-	  	} else if(document.webkitExitFullscreen) {
-	    	document.webkitExitFullscreen();
-	  	}
+	// var exitFullscreen = function(element) {
+	//   	if(document.exitFullscreen) {
+	//     	document.exitFullscreen();
+	//   	} else if(document.mozCancelFullScreen) {
+	//     	document.mozCancelFullScreen();
+	//   	} else if(document.webkitExitFullscreen) {
+	//     	document.webkitExitFullscreen();
+	//   	}
 
-	  	$(element).removeClass('fullscreen');
-	}
+	//   	$(element).removeClass('fullscreen');
+	// }
 
 	/**
 	 * Public method to get all the player instances
@@ -471,11 +448,37 @@
 
 		if ($player.hasClass(FUNKTUBE_CLASS)) return $player;
 
-		FT.IdVideo = $player.attr('data-id');
+		// check fullscreen for native support
+	    if (typeof document.cancelFullScreen != 'undefined') {
+	        FT.fullScreenApi.supportsFullScreen = true;
+	    } else {
+	        // check for fullscreen support by vendor prefix
+	        for (var i = 0, il = FT.browserPrefixes.length; i < il; i++ ) {
+	            FT.fullScreenApi.prefix = FT.browserPrefixes[i];
+	 
+	            if (typeof document[FT.fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
+	                FT.fullScreenApi.supportsFullScreen = true;
+	 
+	                break;
+	            }
+	        }
+	    }
+
+	    // update eventname for fullscreen
+	    if (FT.fullScreenApi.supportsFullScreen) {
+	        FT.fullScreenApi.fullScreenEventName = FT.fullScreenApi.prefix + 'fullscreenchange';
+
+	        document.addEventListener(FT.fullScreenApi.fullScreenEventName, FT.fullScreenChange );
+	    }
 
 		var o = $.extend({}, defaults, opts);
 
 		o.playerID += "-" + guid();
+		
+		// another way to get video id with data-id
+		if(typeof o.initialVideo === 'undefined'){
+			o.initialVideo = $player.attr('data-id');
+		}
 
 		$player.addClass(FUNKTUBE_CLASS).data(OPTS, o);
 
@@ -487,7 +490,7 @@
 
 		$(FT.getControl($player, o)).appendTo($player);
 
-		// zzz
+		// if use thumbnails
 		if(o.useThumb){
 			FT.getThumb($player,o);
 		} else {
@@ -533,7 +536,7 @@
   		FT.playThumbnail.push('</div>'); // end of .thumb-play-button
 
 		$('<div class="funk-frame"></div>').attr('id', o.playerID).css({
-            'background-image': ['url(//img.youtube.com/vi/', FT.IdVideo, '/', thumb_img, ')'].join('')
+            'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
         }).addClass('image-loaded')
         .on('click', function(){
 			//append the player into the container on click
@@ -569,10 +572,10 @@
 		FT.control.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		FT.control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		FT.control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		FT.control.push('<div class="btn-right quality">');
-		FT.control.push('<div class="quality-status"></div>');
-		FT.control.push('<div class="av-quality"></div>'); // container available quality
-		FT.control.push('</div>');
+		// FT.control.push('<div class="btn-right quality">');
+		// FT.control.push('<div class="quality-status"></div>');
+		// FT.control.push('<div class="av-quality"></div>'); // container available quality
+		// FT.control.push('</div>');
 		FT.control.push('</div>');
 
 		// insert the player container
@@ -616,7 +619,7 @@
 
 			new YT.Player(o.playerID, {
 
-				videoId: FT.IdVideo,
+				videoId: o.initialVideo,
 
 				width: o.width,
 
@@ -632,7 +635,7 @@
 
 					'loop': (o.loop ? 1 : 0),
 
-					'playlist': (o.loop ? FT.IdVideo : ""),
+					'playlist': (o.loop ? o.initialVideo : ""),
 
 					'rel': (o.showRelated ? 1 : 0),
 
@@ -751,6 +754,21 @@
 
 	};
 
+    FT.requestFullScreen = function(el) {
+    	var _this = FT.fullScreenApi;
+        return (_this.prefix === '') ? el.requestFullScreen() : el[_this.prefix + 'RequestFullScreen']();
+    };
+
+    FT.cancelFullScreen = function(el) {
+    	var _this = FT.fullScreenApi;
+        return (_this.prefix === '') ? document.cancelFullScreen() : document[_this.prefix + 'CancelFullScreen']();
+    };
+
+    FT.fullScreenChange = function(ev) {
+    	var target = $( ev.target );
+    	target.toggleClass('fullscreen');
+    };
+
 	FT.syncUI = function($player, o) {
 
        	$player.find('.funk-yt-button').on('click', function(){
@@ -813,14 +831,23 @@
 	      });
 	    });
 
-		$(".quality").on({
-	        mouseenter: function () {
-	            $(this).addClass('focused');
-	        },
-	        mouseleave: function () {
-	            $(this).removeClass('focused');
-	        }
-	    });
+		// fullscreen
+		$player.find('.fullscreen').on('click', function(){
+
+			var elem = $player.get(0);
+
+			if($player.hasClass('fullscreen')){
+				FT.cancelFullScreen(elem);
+			} else {
+				FT.requestFullScreen(elem);
+			}
+
+		});
+	
+
+		/**
+		 * Todo add quality change button
+		 */
 
    	};
 
