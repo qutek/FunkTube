@@ -30,6 +30,15 @@
 
 		playThumbnail: [],			// thumbnail
 
+		overlayElement: {
+			element: $('<div class="funkplayer-overlay"></div>'),
+			dimmed: false,
+		    darkness    : 0.75,   // 0 means no dimming, 1 means completely dark
+		    fadeInDuration  : 300,    // in ms
+		    fadeOutDuration : 300,    // in ms
+		    curtainZIndex   : 999
+	  	},
+
 		playerData: {
 			duration: 0,
 			currentTime:0,
@@ -106,6 +115,15 @@
 			
 				if (typeof(state) === "object") {
 					state = state.data;
+				}
+
+				/* todo add conditional from options */
+				if(state == FT.State.PAUSED){
+					FT.unDim(_player);
+				}
+
+				if(state == FT.State.PLAYING){
+					FT.dimElement(_player);
 				}
 
 				switch (state) {
@@ -501,11 +519,24 @@
 			FT.syncUI($player, o);
 		}
 
-		//call on initialise
+		/**
+		 * Dimming element
+		 * todo wrap it
+		 */
+		
+
+		/**
+		 * call on initialise
+		 * Todo wrap it to conditional
+		 */
 		FT.lazyload($('.funk-frame'));
 
 		//call after window scrolls
 	    $(window).scroll(function(){
+	    	FT.lazyload($('.funk-frame'));
+		});
+
+		$(window).resize(function(){
 	    	FT.lazyload($('.funk-frame'));
 		});
 
@@ -556,6 +587,8 @@
         .on('click', function(){
 			//append the player into the container on click
 			FT.initPlayer($player, o);
+
+			FT.dimElement($player);
 		})
 		.html(FT.playThumbnail.join(''))
 		.appendTo($player);
@@ -885,6 +918,51 @@
 				}
 		    });
 		}
+	};
+
+	FT.dimElement = function ($player) {
+
+		if(FT.overlayElement.dimmed)
+			return;
+
+	    // Initialize curtain
+	    FT.overlayElement.element.css({
+	      position:   'fixed',
+	      left:     0,
+	      top:    0,
+	      width:    '100%',
+	      height:   '100%',
+	      background: 'black',
+	      opacity:  0,
+	      zIndex:   FT.overlayElement.curtainZIndex
+	    });
+
+	    $('body').append(FT.overlayElement.element);
+
+	    FT.overlayElement.element.stop().animate({ opacity: FT.overlayElement.darkness }, FT.overlayElement.fadeInDuration, function () {
+	    	$player.css({
+			   'position' : 'relative',
+			   'z-index' : FT.overlayElement.curtainZIndex+1
+			});
+
+			FT.overlayElement.dimmed = true;
+	    });
+	};
+
+	FT.unDim = function ($player) {
+
+		FT.overlayElement.element.animate({opacity: 0}, FT.overlayElement.fadeOutDuration, function () {
+
+			$player.css({
+			   'position' : '',
+			   'z-index' : ''
+			});
+
+			FT.overlayElement.element.remove();
+
+			FT.overlayElement.dimmed = false;
+		});
+
 	};
 
 	/**
