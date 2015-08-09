@@ -30,8 +30,6 @@
 
 		playThumbnail: [],			// thumbnail
 
-		control: [],				// control
-
 		playerData: {
 			duration: 0,
 			currentTime:0,
@@ -488,6 +486,7 @@
 		// initialize the default event methods
 		FT.initDefaults($.funktube.defaults, o);
 
+		// alert(FT.getControl($player, o));
 		$(FT.getControl($player, o)).appendTo($player);
 
 		// if use thumbnails
@@ -501,6 +500,14 @@
 			// sync ui
 			FT.syncUI($player, o);
 		}
+
+		//call on initialise
+		FT.lazyload($('.funk-frame'));
+
+		//call after window scrolls
+	    $(window).scroll(function(){
+	    	FT.lazyload($('.funk-frame'));
+		});
 
 		return $player;
 
@@ -535,9 +542,17 @@
       	FT.playThumbnail.push('</svg>');
   		FT.playThumbnail.push('</div>'); // end of .thumb-play-button
 
-		$('<div class="funk-frame"></div>').attr('id', o.playerID).css({
-            'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
-        }).addClass('image-loaded')
+		// $('<div class="funk-frame"></div>').attr('id', o.playerID).css({
+  //           'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
+  //       }).addClass('image-loaded')
+  //       .on('click', function(){
+		// 	//append the player into the container on click
+		// 	FT.initPlayer($player, o);
+		// })
+		// .html(FT.playThumbnail.join(''))
+		// .appendTo($player);
+		
+		$('<div class="funk-frame"></div>').attr('id', o.playerID).attr('data-bgimg', '//img.youtube.com/vi/'+o.initialVideo+'/'+thumb_img)
         .on('click', function(){
 			//append the player into the container on click
 			FT.initPlayer($player, o);
@@ -551,35 +566,38 @@
 	};
 
 	FT.getControl = function($player, o){
+		var control = [];
 		// create controll
-		FT.control.push('<div class="preloader-container"><div class="loader"></div></div>');
-		FT.control.push('<div class="funk-yt-controls">');
-        FT.control.push('<div class="funk-yt-time-rail">');
-      	FT.control.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
-        FT.control.push('<span class="funk-yt-time-loaded"></span>');
-		FT.control.push('<span class="funk-yt-time-current slide-control"></span>');
-		FT.control.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
-		FT.control.push('<span class="funk-yt-time-float-current"></span>');
-		FT.control.push('</span>');
-		FT.control.push('</span>');
-		FT.control.push('</div>');
+		control.push('<div class="preloader-container"><div class="loader"></div></div>');
+		control.push('<div class="funk-yt-controls">');
+        control.push('<div class="funk-yt-time-rail">');
+      	control.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
+        control.push('<span class="funk-yt-time-loaded"></span>');
+		control.push('<span class="funk-yt-time-current slide-control"></span>');
+		control.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
+		control.push('<span class="funk-yt-time-float-current"></span>');
+		control.push('</span>');
+		control.push('</span>');
+		control.push('</div>');
 
-		FT.control.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
-		FT.control.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
-		FT.control.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
-		FT.control.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
-		FT.control.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
-		FT.control.push('<div class="funk-yt-info current-time">00:00:00</div>');
-		FT.control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
-		FT.control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		// FT.control.push('<div class="btn-right quality">');
-		// FT.control.push('<div class="quality-status"></div>');
-		// FT.control.push('<div class="av-quality"></div>'); // container available quality
-		// FT.control.push('</div>');
-		FT.control.push('</div>');
+		control.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
+		control.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
+		control.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
+		control.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
+		control.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
+		control.push('<div class="funk-yt-info current-time">00:00:00</div>');
+		control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
+		control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
+		// control.push('<div class="btn-right quality">');
+		// control.push('<div class="quality-status"></div>');
+		// control.push('<div class="av-quality"></div>'); // container available quality
+		// control.push('</div>');
+		control.push('</div>');
 
 		// insert the player container
-		return FT.control.join('');
+		return control.join('');
+
+		// return '<div class="xxx">sss</div>';
 	};
 
 	/**
@@ -850,6 +868,24 @@
 		 */
 
    	};
+
+   	FT.lazyload = function(elem){
+		var viewport_height = $(window).height();
+		var scrollTop = $(document).scrollTop();
+		
+		if(elem.filter(":not('.loaded')").length){
+			elem.filter(":not('.loaded')").each(function() {
+		        // Do something to each element here.
+	        	var offset_top = $(this).offset().top;
+				var elem_height = $(this).height();
+				if(offset_top + elem_height/3 < viewport_height + scrollTop){
+					var bg_img = $(this).data('bgimg');
+					$(this).css({'background-image':"url("+bg_img+")"}).addClass('image-loaded').fadeIn();
+					$(this).addClass('loaded');
+				}
+		    });
+		}
+	};
 
 	/**
 	 * Initialize an iframe player
