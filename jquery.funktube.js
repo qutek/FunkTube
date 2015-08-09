@@ -8,28 +8,39 @@
 
 	'use strict';
 
-	/**
-	 * var
-	 */
+	//
+	//  namespace
+	//
 	var FUNKTUBE = ".funktube",
 
 		FUNKTUBE_CLASS = "funk-tube",
 
-		OPTS = "opts" + FUNKTUBE,
+		OPTS = "opts" + FUNKTUBE;
 
-		CONTROL = [],
-
-		playThumbnail = [];
-
-	/**
-	 * package
-	 * @type {Object}
-	 */
+	//	
+	//
+	// FunkTube package 
+	//
+	//
 	var FT = {
 		
-		inited: false,				// player status
+		IdVideo: 'DkoeNLuMbcI',		// video id
+
+		inited: false,				// funktube inited flag - for destroy/re-init
 		
 		ytplayers: {},				// all the instances that exist
+
+		playThumbnail: [],			// thumbnail
+
+		control: [],				// control
+
+		playerData: {
+			duration: 0,
+			currentTime:0,
+			videoLoadedFraction:0,
+			quality: 'auto',
+			availableQualityLevels: ['auto']
+		},
 		
 		inits: [],					// local init functions for multiple iframe players
 		
@@ -50,26 +61,15 @@
 			'NOT_FOUND': 100,
 			'NOT_EMBEDDABLE': 101,
 			'CANT_PLAY': 150
-		},
-
-		PlayerStatus: {
-			'-1': 'unstarted',
-			'0': 'ended',
-			'1': 'playing',
-			'2': 'paused',
-			'3': 'buffering',
-			'5': 'cued' 
 		}
-
-		// Bind: undefined,
-
-		// Param: undefined
 		
 	};
 
-	/**
-	 * public facing defaults
-	 */
+	//
+	//
+	// public facing defaults
+	//
+	//
 	$.funktube = {
 		
 		events: {},				// events cache -- used by flashplayer version of video player
@@ -88,52 +88,10 @@
 	 */
 	$.funktube.defaults = {
 
-		afterReady: function($player, o) {
-
-			// alert($player.funktube('data'));
-
-			$(FT.getControl($player, o)).appendTo($player);
-
-			if($player.funktube('isMuted')){
-				$player.find('.btn-mute').hide();
-			} else {
-				$player.find('.btn-unmute').hide();
-			}
-
-			// set current volume status
-			var curVol = $player.funktube('volume');
-			$player.find('.funk-yt-slide.volume').find('.slide-control').css('width', curVol+'%');
-			
-			$player.find('.funk-yt-button').on('click', function(){
-				var bind = $(this).attr('data-control'),
-					param = $(this).attr('data-param');
-
-				if(typeof(bind) == 'string'){
-					$player.funktube(bind, param);
-				}
-			});
-
-			// fullscreen
-			$player.find('.fullscreen').on('click', function(){
-				var elem = $player.get(0);
-
-				if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-				    launchIntoFullscreen(elem);
-			  	} else {
-			  		exitFullscreen(elem);
-			  	}
-			});
-
-			$( $player ).on({
-		        mouseenter: function () {
-		            $(this).addClass('focused');
-		        },
-		        mouseleave: function () {
-		            $(this).removeClass('focused');
-		        }
-		    });
-
+		afterReady: function(player) {
+			// this.syncUI(player);
 		}, // args: $player
+
 		stateChange: function(player) {
 
 			var _ret = this.onPlayer;
@@ -144,16 +102,6 @@
 			
 				if (typeof(state) === "object") {
 					state = state.data;
-				}
-
-				// alert(state);
-				// alert(FT.PlayerStatus[state]);
-				_player.find('.funk-yt-controls').attr('class', 'funk-yt-controls '+FT.PlayerStatus[state]);
-				// control preloader
-				if(state == FT.State.BUFFERING){
-					_player.find('.preloader-container').removeClass('hide');
-				} else {
-					_player.find('.preloader-container').addClass('hide');
 				}
 
 				switch (state) {
@@ -252,7 +200,7 @@
 			notFound: {},
 			notEmbeddable: {},
 			invalidParameter: {}
-		}
+		},
 
 	};
 
@@ -267,36 +215,32 @@
 		width: '',
 		height: '',
 		ratio: '16:9',
+		useThumb: true,
 		allowFullScreen: "true",
-		// initialVideo: "DkoeNLuMbcI", //change to data-id
+		// initialVideo: "DkoeNLuMbcI",
 		start: 0,
 		preferredQuality: "auto",
-		showControls: true,
+		showControls: false,
 		showRelated: false,
 		playsinline: false,
 		annotations: true,
-		autoPlay: false,
+		autoPlay: true,
 		autoHide: true,
 		loop: 0,
-		theme: 'dark', // 'dark' or 'light'
-		color: 'red', // 'red' or 'white'
+		theme: 'dark',
+		// 'dark' or 'light'
+		color: 'red',
+		// 'red' or 'white'
 		showinfo: false,
-		modestbranding: true,
+		modestbranding: false,
 		protocol: 'http',
 		// set to 'https' for compatibility on SSL-enabled pages
 		// with respect to [wmode] - 'transparent' maintains z-index, but disables GPU acceleration
 		wmode: 'transparent',
 		// you probably want to use 'window' when optimizing for mobile devices
-		swfobjectURL: "ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js",
-		// exclude the protocol, it will be read from the 'protocol' property
-		loadSWFObject: false,
-		// by default, we will attempt to load the swfobject script, if utilizing the flash player
-		// privately used
+		
 		allowScriptAccess: "always",
 		playerID: "funktube-container",
-
-		// html5 specific attrs
-		iframed: true,
 
 		// functions called when events are triggered by using the funktube interface
 		onPlay: function() {}, // arg: id
@@ -527,27 +471,41 @@
 
 		if ($player.hasClass(FUNKTUBE_CLASS)) return $player;
 
+		FT.IdVideo = $player.attr('data-id');
+
 		var o = $.extend({}, defaults, opts);
 
 		o.playerID += "-" + guid();
-
-		// change way to get video id with data-id
-		if(typeof o.initialVideo === 'undefined'){
-			o.initialVideo = $player.attr('data-id');
-		}
-
-		// alert(o.initialVideo);
 
 		$player.addClass(FUNKTUBE_CLASS).data(OPTS, o);
 
 		for (var event in PLAYER)
 			$player.bind(event + FUNKTUBE, $player, PLAYER[event]);
 
-		// initialize the default event methods o.initialVideo
-		FT.initDefaults($player, $.funktube.defaults, o);
+		// initialize the default event methods
+		FT.initDefaults($.funktube.defaults, o);
 
-		// get image
-		// width and height might override default_ratio value
+		$(FT.getControl($player, o)).appendTo($player);
+
+		// zzz
+		if(o.useThumb){
+			FT.getThumb($player,o);
+		} else {
+
+			$("<div></div>").attr("id", o.playerID).appendTo($player);
+			// init
+			FT.initPlayer($player, o);
+			// sync ui
+			FT.syncUI($player, o);
+		}
+
+		return $player;
+
+	};
+
+	FT.getThumb = function($player, o) {
+
+		// append thumbnail
 		var ratio = o.ratio.split(":"),
 			playerWidth = $player.width(),
 			thumb_img = '';
@@ -565,64 +523,60 @@
           thumb_img = 'default.jpg';
         }
 
-        playThumbnail.push('<div class="thumb-play-button"');
-      	if (playerWidth <= 640) playThumbnail.push(' style="transform: scale(0.563888888888889);"');
-      	playThumbnail.push('>');
-      	playThumbnail.push('<svg>');
-        	playThumbnail.push('<path fill-rule="evenodd" clip-rule="evenodd" fill="#1F1F1F" class="thumb-play-button-svg" d="M84.15,26.4v6.35c0,2.833-0.15,5.967-0.45,9.4c-0.133,1.7-0.267,3.117-0.4,4.25l-0.15,0.95c-0.167,0.767-0.367,1.517-0.6,2.25c-0.667,2.367-1.533,4.083-2.6,5.15c-1.367,1.4-2.967,2.383-4.8,2.95c-0.633,0.2-1.316,0.333-2.05,0.4c-0.767,0.1-1.3,0.167-1.6,0.2c-4.9,0.367-11.283,0.617-19.15,0.75c-2.434,0.034-4.883,0.067-7.35,0.1h-2.95C38.417,59.117,34.5,59.067,30.3,59c-8.433-0.167-14.05-0.383-16.85-0.65c-0.067-0.033-0.667-0.117-1.8-0.25c-0.9-0.133-1.683-0.283-2.35-0.45c-2.066-0.533-3.783-1.5-5.15-2.9c-1.033-1.067-1.9-2.783-2.6-5.15C1.317,48.867,1.133,48.117,1,47.35L0.8,46.4c-0.133-1.133-0.267-2.55-0.4-4.25C0.133,38.717,0,35.583,0,32.75V26.4c0-2.833,0.133-5.95,0.4-9.35l0.4-4.25c0.167-0.966,0.417-2.05,0.75-3.25c0.7-2.333,1.567-4.033,2.6-5.1c1.367-1.434,2.967-2.434,4.8-3c0.633-0.167,1.333-0.3,2.1-0.4c0.4-0.066,0.917-0.133,1.55-0.2c4.9-0.333,11.283-0.567,19.15-0.7C35.65,0.05,39.083,0,42.05,0L45,0.05c2.467,0,4.933,0.034,7.4,0.1c7.833,0.133,14.2,0.367,19.1,0.7c0.3,0.033,0.833,0.1,1.6,0.2c0.733,0.1,1.417,0.233,2.05,0.4c1.833,0.566,3.434,1.566,4.8,3c1.066,1.066,1.933,2.767,2.6,5.1c0.367,1.2,0.617,2.284,0.75,3.25l0.4,4.25C84,20.45,84.15,23.567,84.15,26.4z M33.3,41.4L56,29.6L33.3,17.75V41.4z"></path>');
-	        playThumbnail.push('<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" points="33.3,41.4 33.3,17.75 56,29.6"></polygon>');
-      	playThumbnail.push('</svg>');
-  		playThumbnail.push('</div>'); // end of .thumb-play-button
+        FT.playThumbnail.push('<div class="thumb-play-button"');
+      	if (playerWidth <= 640) FT.playThumbnail.push(' style="transform: scale(0.563888888888889);"');
+      	FT.playThumbnail.push('>');
+      	FT.playThumbnail.push('<svg>');
+        	FT.playThumbnail.push('<path fill-rule="evenodd" clip-rule="evenodd" fill="#1F1F1F" class="thumb-play-button-svg" d="M84.15,26.4v6.35c0,2.833-0.15,5.967-0.45,9.4c-0.133,1.7-0.267,3.117-0.4,4.25l-0.15,0.95c-0.167,0.767-0.367,1.517-0.6,2.25c-0.667,2.367-1.533,4.083-2.6,5.15c-1.367,1.4-2.967,2.383-4.8,2.95c-0.633,0.2-1.316,0.333-2.05,0.4c-0.767,0.1-1.3,0.167-1.6,0.2c-4.9,0.367-11.283,0.617-19.15,0.75c-2.434,0.034-4.883,0.067-7.35,0.1h-2.95C38.417,59.117,34.5,59.067,30.3,59c-8.433-0.167-14.05-0.383-16.85-0.65c-0.067-0.033-0.667-0.117-1.8-0.25c-0.9-0.133-1.683-0.283-2.35-0.45c-2.066-0.533-3.783-1.5-5.15-2.9c-1.033-1.067-1.9-2.783-2.6-5.15C1.317,48.867,1.133,48.117,1,47.35L0.8,46.4c-0.133-1.133-0.267-2.55-0.4-4.25C0.133,38.717,0,35.583,0,32.75V26.4c0-2.833,0.133-5.95,0.4-9.35l0.4-4.25c0.167-0.966,0.417-2.05,0.75-3.25c0.7-2.333,1.567-4.033,2.6-5.1c1.367-1.434,2.967-2.434,4.8-3c0.633-0.167,1.333-0.3,2.1-0.4c0.4-0.066,0.917-0.133,1.55-0.2c4.9-0.333,11.283-0.567,19.15-0.7C35.65,0.05,39.083,0,42.05,0L45,0.05c2.467,0,4.933,0.034,7.4,0.1c7.833,0.133,14.2,0.367,19.1,0.7c0.3,0.033,0.833,0.1,1.6,0.2c0.733,0.1,1.417,0.233,2.05,0.4c1.833,0.566,3.434,1.566,4.8,3c1.066,1.066,1.933,2.767,2.6,5.1c0.367,1.2,0.617,2.284,0.75,3.25l0.4,4.25C84,20.45,84.15,23.567,84.15,26.4z M33.3,41.4L56,29.6L33.3,17.75V41.4z"></path>');
+	        FT.playThumbnail.push('<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" points="33.3,41.4 33.3,17.75 56,29.6"></polygon>');
+      	FT.playThumbnail.push('</svg>');
+  		FT.playThumbnail.push('</div>'); // end of .thumb-play-button
 
 		$('<div class="funk-frame"></div>').attr('id', o.playerID).css({
-            'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
+            'background-image': ['url(//img.youtube.com/vi/', FT.IdVideo, '/', thumb_img, ')'].join('')
         }).addClass('image-loaded')
         .on('click', function(){
 			//append the player into the container on click
 			FT.initPlayer($player, o);
 		})
-		.html(playThumbnail.join(''))
+		.html(FT.playThumbnail.join(''))
 		.appendTo($player);
-
-		// $.getJSON('http://gdata.youtube.com/feeds/api/videos/'+o.initialVideo+'?v=3&alt=jsonc',function(data,status,xhr){
-		//     alert(data.data.title);
-		//     // data contains the JSON-Object below
-		// });
-
-		return $player;
+		
+		// sync ui
+		FT.syncUI($player, o);
 
 	};
 
 	FT.getControl = function($player, o){
 		// create controll
-		CONTROL.push('<div class="preloader-container"><div class="loader"></div></div>');
-		CONTROL.push('<div class="funk-yt-controls">');
-        CONTROL.push('<div class="funk-yt-time-rail">');
-      	CONTROL.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
-        CONTROL.push('<span class="funk-yt-time-loaded"></span>');
-		CONTROL.push('<span class="funk-yt-time-current slide-control"></span>');
-		CONTROL.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
-		CONTROL.push('<span class="funk-yt-time-float-current"></span>');
-		CONTROL.push('</span>');
-		CONTROL.push('</span>');
-		CONTROL.push('</div>');
+		FT.control.push('<div class="preloader-container"><div class="loader"></div></div>');
+		FT.control.push('<div class="funk-yt-controls">');
+        FT.control.push('<div class="funk-yt-time-rail">');
+      	FT.control.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
+        FT.control.push('<span class="funk-yt-time-loaded"></span>');
+		FT.control.push('<span class="funk-yt-time-current slide-control"></span>');
+		FT.control.push('<span class="funk-yt-time-float slide-info">'); // tooltip time
+		FT.control.push('<span class="funk-yt-time-float-current"></span>');
+		FT.control.push('</span>');
+		FT.control.push('</span>');
+		FT.control.push('</div>');
 
-		CONTROL.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
-		CONTROL.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
-		CONTROL.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
-		CONTROL.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
-		CONTROL.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
-		CONTROL.push('<div class="funk-yt-info current-time">00:00:00</div>');
-		CONTROL.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
-		CONTROL.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		CONTROL.push('<div class="btn-right quality">');
-		CONTROL.push('<div class="quality-status"></div>');
-		CONTROL.push('<div class="av-quality"></div>'); // container available quality
-		CONTROL.push('</div>');
-		CONTROL.push('</div>');
+		FT.control.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
+		FT.control.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
+		FT.control.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
+		FT.control.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
+		FT.control.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
+		FT.control.push('<div class="funk-yt-info current-time">00:00:00</div>');
+		FT.control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
+		FT.control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
+		FT.control.push('<div class="btn-right quality">');
+		FT.control.push('<div class="quality-status"></div>');
+		FT.control.push('<div class="av-quality"></div>'); // container available quality
+		FT.control.push('</div>');
+		FT.control.push('</div>');
 
 		// insert the player container
-		return CONTROL.join('');
+		return FT.control.join('');
 	};
 
 	/**
@@ -650,7 +604,7 @@
 
 	/**
 	 * This method handles the player init. Since
-	 * onYouTubePlayerReady is called when the script
+	 * onYouFunkTubeReady is called when the script
 	 * has been evaluated, we want all the instances
 	 * to get init'd. For this we have a init queue.
 	 * If the script has been init'd, we automatically
@@ -662,7 +616,7 @@
 
 			new YT.Player(o.playerID, {
 
-				videoId: o.initialVideo,
+				videoId: FT.IdVideo,
 
 				width: o.width,
 
@@ -670,27 +624,25 @@
 
 				playerVars: {
 
-					'autoplay': 1, // force autoplay false because controled with our custom controls
+					'autoplay': (o.autoPlay ? 1 : 0),
 
-					'autohide': 1,
+					'autohide': (o.autoHide ? 1 : 0),
 
-					'enablejsapi': 1,
-
-					'controls': 0,
+					'controls': (o.showControls ? 1 : 0),
 
 					'loop': (o.loop ? 1 : 0),
 
-					'playlist': (o.loop ? o.initialVideo : ""),
+					'playlist': (o.loop ? FT.IdVideo : ""),
 
-					'rel': (o.showRelated ? 1 : 0), // related video
+					'rel': (o.showRelated ? 1 : 0),
 
 					'fs': (o.allowFullScreen ? 1 : 0),
 
 					'wmode': o.wmode,
 
-					'showinfo': 0,
+					'showinfo': (o.showinfo ? 1 : 0),
 
-					'modestbranding': 1,
+					'modestbranding': (o.modestbranding ? 1 : 0),
 
 					'iv_load_policy': (o.annotations ? 1 : 3),
 
@@ -712,7 +664,7 @@
 
 						var $player = $(evt.target.getIframe()).parents("." + FUNKTUBE_CLASS);
 
-						$.funktube.defaults.afterReady($player, o);
+						$.funktube.defaults.afterReady($player);
 
 					},
 
@@ -760,163 +712,21 @@
 	 * @param d - the defaults
 	 * @param o - the options w/ methods to attach
 	 */
-	FT.initDefaults = function($player, d, o) {
+	FT.initDefaults = function(d, o) {
 
 		var ID = o.playerID;
 
 		// default onPlayer events
 		var dp = d.onPlayer;
-
-		// default data
-		var data = {
-			duration: 0,
-			currentTime:0,
-			videoLoadedFraction:0,
-			quality: 'auto',
-			availableQualityLevels: ['auto']
-		};
-
-		dp.unstarted[ID] = function(){
-			$player.find('.btn-stop').hide();
-			$player.find('.btn-play').show();
-			o.onPlayerUnstarted;
-		};
-		dp.ended[ID] = function(){
-			$player.find('.btn-stop').hide();
-			$player.find('.btn-play').show();
-			o.onPlayerEnded;
-		};
-		dp.playing[ID] = function(){
-
-			$player.find('.btn-play').hide();
-			$player.find('.btn-pause').show();
-
-			// alert(curQuality);
-			setInterval(function(){
-			   	data = $player.funktube('data'); // change data
-			   	$player.find('.current-time').text(convertTime(data.currentTime));
-			   	$player.find('.total-time').text('| '+ convertTime(data.duration));
-				$player.find('.funk-yt-time-current').css('width', getPercent(data.currentTime, data.duration)+'%'); // set progressbar percentage
-				$player.find('.funk-yt-time-float').css('left', getPercent(data.currentTime, data.duration)+'%'); // set position of tooltip
-				$player.find('.funk-yt-time-loaded').css('width', data.videoLoadedFraction*data.duration);
-			   	$player.find('.funk-yt-time-float-current').text(convertTime(data.currentTime));
-			},100); //polling frequency in miliseconds
-
-			// wait data updated
-			setTimeout(function() {
-				var curQuality = $player.funktube('quality'),
-					list = createQualitylevel(data.availableQualityLevels, curQuality),
-					elQuality = $player.find('.quality');
-
-				elQuality.find('.quality-status').html(curQuality);	
-				elQuality.find('.av-quality').html(list);
-				
-				elQuality.find('a').on('click', function(){
-					var setQuality = $(this).attr('data-quality'),
-						icon = $(this).attr('data-quality'); // todo change to icon
-					// alert(setQuality);
-					
-					elQuality.removeClass('focused');
-					$player.funktube('quality', setQuality);
-
-					elQuality.find('.quality-status').html(setQuality);
-	      			elQuality.find('.sep').html(icon);
-				});
-
-		  	}, 100);
-
-			// progress bar and volume
-			$('.funk-yt-slide').each(function(){
-
-		      var $control = $(this),
-		      	  $bind = $control.attr('data-control'),
-		          $window = $(window);
-
-		      $control.on('mousedown', function() {
-		        $control.on('mousemove', function(){
-
-			        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
-			        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
-			        // update
-		          	if($bind == 'seek'){
-			        	$player.funktube($bind, ( setFill(event, $control) / 100) * data.duration );
-			        } else {
-			        	$player.funktube($bind, setFill(event, $control).toFixed());
-			        }
-		        });
-		      });
-
-		      $control.on('click', function(event) {
-
-		        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
-		        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
-		        // update
-		        if($bind == 'seek'){
-		        	$player.funktube($bind, ( setFill(event, $control) / 100) * data.duration );
-		        } else {
-		        	$player.funktube($bind, setFill(event, $control).toFixed());
-		        }
-		      });
-
-		      $window.on('mouseup', function(event) {
-		        $control.off('mousemove');
-		      });
-		    });
-
-			$(".quality").on({
-		        mouseenter: function () {
-		            $(this).addClass('focused');
-		        },
-		        mouseleave: function () {
-		            $(this).removeClass('focused');
-		        }
-		    });
-
-			o.onPlayerPlaying;
-		};
-		dp.paused[ID] = function(){
-
-			$player.find('.btn-pause').hide();
-			$player.find('.btn-play').show();
-
-			o.onPlayerPaused;
-		};
-		dp.buffering[ID] = function(){
-
-			$player.find('.preloader-container').removeClass('hide');
-			
-			o.onPlayerBuffering;
-		};
-		dp.cued[ID] = function(){
-			// alert('cued');
-			o.onPlayerCued;
-		};
+		dp.unstarted[ID] = o.onPlayerUnstarted;
+		dp.ended[ID] = o.onPlayerEnded;
+		dp.playing[ID] = o.onPlayerPlaying;
+		dp.paused[ID] = o.onPlayerPaused;
+		dp.buffering[ID] = o.onPlayerBuffering;
+		dp.cued[ID] = o.onPlayerCued;
 
 		// default onQualityChange
-		d.onQualityChange[ID] = function(){
-
-			var curQuality = $player.funktube('quality'),
-				list = createQualitylevel(data.availableQualityLevels, curQuality),
-				elQuality = $player.find('.quality');
-
-			elQuality.find('.quality-status').html(curQuality);	
-			elQuality.find('.av-quality').html(list);
-
-			elQuality.find('a').on('click', function(){
-				var setQuality = $(this).attr('data-quality'),
-					icon = $(this).attr('data-quality'); // todo change to icon
-				// alert(setQuality);
-				
-				elQuality.removeClass('focused');
-				$player.funktube('quality', setQuality);
-
-				elQuality.find('.quality-status').html(setQuality);
-      			elQuality.find('.sep').html(icon);
-			});
-
-			// call user function
-			o.onQualityChange;
-		};
+		d.onQualityChange[ID] = o.onQualityChange;
 
 		// default onError events
 		var de = d.onErr;
@@ -928,20 +738,91 @@
 	};
 
 	/**
-	 * init the iframed option if its requested and supported
-	 * otherwise initialize the flash based player
+	 * init the iframed option if its requested 
 	 * @param $player - the player that the funktube binds to
 	 * @param o - the init options
 	 */
 	FT.initPlayer = function($player, o) {
 
-		if (o.iframed) FT.initIframePlayer($player, o);
-
-		else FT.initFlashPlayer($player, o);
+		FT.initIframePlayer($player, o);
 
 		$($player).find('.funk-frame').removeClass('image-loaded').addClass('video-loaded')
 		.css('background-image','');
+
 	};
+
+	FT.syncUI = function($player, o) {
+
+       	$player.find('.funk-yt-button').on('click', function(){
+       		alert(FT.inited);
+       		var bind = $(this).attr('data-control'),
+				param = $(this).attr('data-param');
+
+			if(typeof(bind) == 'string'){
+				$player.funktube(bind, param);
+			}
+       	});
+
+       	// alert(curQuality);
+		setInterval(function(){
+		   	FT.playerData = $player.funktube('data');
+		   	// console.log(FT.playerData.currentTime);
+		   	$player.find('.current-time').text(convertTime(FT.playerData.currentTime));
+		   	$player.find('.total-time').text('| '+ convertTime(FT.playerData.duration));
+			$player.find('.funk-yt-time-current').css('width', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set progressbar percentage
+			$player.find('.funk-yt-time-float').css('left', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set position of tooltip
+			$player.find('.funk-yt-time-loaded').css('width', FT.playerData.videoLoadedFraction*FT.playerData.duration);
+		   	$player.find('.funk-yt-time-float-current').text(convertTime(FT.playerData.currentTime));
+		},100); //polling frequency in miliseconds
+
+		// progress bar and volume
+		$('.funk-yt-slide').each(function(){
+
+	      var $control = $(this),
+	      	  $bind = $control.attr('data-control'),
+	          $window = $(window);
+
+	      $control.on('mousedown', function() {
+	        $control.on('mousemove', function(){
+
+		        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+		        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+		        // update
+	          	if($bind == 'seek'){
+		        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
+		        } else {
+		        	$player.funktube($bind, setFill(event, $control).toFixed());
+		        }
+	        });
+	      });
+
+	      $control.on('click', function(event) {
+
+	        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+	        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+	        // update
+	        if($bind == 'seek'){
+	        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
+	        } else {
+	        	$player.funktube($bind, setFill(event, $control).toFixed());
+	        }
+	      });
+
+	      $window.on('mouseup', function(event) {
+	        $control.off('mousemove');
+	      });
+	    });
+
+		$(".quality").on({
+	        mouseenter: function () {
+	            $(this).addClass('focused');
+	        },
+	        mouseleave: function () {
+	            $(this).removeClass('focused');
+	        }
+	    });
+
+   	};
 
 	/**
 	 * Initialize an iframe player
@@ -965,100 +846,6 @@
 
 		// init the iframe player
 		window.onYouTubePlayerAPIReady = FT.iframeReady(o);
-
-	};
-
-	/**
-	 * Flash player initialization
-	 *  -> if 'loadSWFObject' is set to true, player will only be init'd
-	 *      when the swfobject script request has completed successfully
-	 *  -> if 'loadSWFObject' is set to false, assumes that you have
-	 *      imported your own SWFObject, prior to FunkTube's initialization
-	 * @imports swfobject automatically
-	 */
-	FT.initFlashPlayer = function($player, o) {
-
-		if (o.loadSWFObject) {
-
-			// cleanup swfobjectURL to re-apply the protocol
-			o.swfobjectURL = o.swfobjectURL.replace('http://', '');
-			o.swfobjectURL = o.swfobjectURL.replace('https://', '');
-			o.swfobjectURL = o.protocol + '://' + o.swfobjectURL;
-
-			$.getScript(o.swfobjectURL, FT.init_flash_player(o));
-
-		} else {
-
-			FT.init_flash_player(o)();
-
-		}
-
-	};
-
-	FT.init_flash_player = function(o) {
-
-		return function() {
-			
-			if(!window.swfobject){
-				// no swfobject 
-				alert("YouTube Player couldn't be initialized. Please include swfobject.");
-				return;
-			}
-
-			var url = ["//www.youtube.com/v/"];
-			url.push(o.initialVideo);
-			url.push("?&enablejsapi=1&version=3");
-			url.push("&playerapiid=" + o.playerID);
-			url.push("&rel=" + (o.showRelated ? 1 : 0));
-			url.push("&autoplay=1");
-			url.push("&autohide=1");
-			url.push("&loop=" + (o.loop ? 1 : 0));
-			url.push("&playlist=" + (o.loop ? o.initialVideo : ""));
-			url.push("&controls=0");
-			url.push("&showinfo=0");
-			url.push("&modestbranding=1");
-			url.push("&iv_load_policy=" + (o.annotations ? 1 : 3));
-			url.push("&start=" + o.start);
-			url.push("&theme=" + o.theme);
-			url.push("&color=" + o.color);
-			url.push("&playsinline=" + o.playsinline);
-			url.push("&fs=" + (o.allowFullScreen ? 1 : 0));
-
-			window.swfobject.embedSWF(url.join(""), o.playerID, o.width, o.height, "8", null, null, {
-				allowScriptAccess: o.allowScriptAccess,
-				wmode: o.wmode,
-				allowFullScreen: o.allowFullScreen
-			}, {
-				id: o.playerID
-			});
-
-			// init the player ready fn
-			window.onYouTubePlayerReady = function(playerId) {
-
-				var player = document.getElementById(playerId);
-
-				var pid = playerId.replace(/-/g, '');
-
-				var d = $.funktube.defaults;
-				$.funktube.events[pid] = {
-					"stateChange": d.stateChange(playerId),
-					"error": d.onError(playerId),
-					"qualityChange": d.qualityChange(playerId)
-				};
-
-				player.addEventListener("onStateChange", "$.funktube.events." + pid + ".stateChange");
-				player.addEventListener("onError", "$.funktube.events." + pid + ".error");
-				player.addEventListener("onPlaybackQualityChange", "$.funktube.events." + pid + ".qualityChange");
-
-				FT.ytplayers[playerId] = player;
-
-				var $player = $(player).parents("." + FUNKTUBE_CLASS);
-
-				$.funktube.defaults.afterReady($player, o);
-
-			};
-
-		};
 
 	};
 
@@ -1148,9 +935,6 @@
 
 			p.$player.attr("data-prev-mute-volume", p.ytplayer.getVolume());
 
-			p.$player.find('.btn-mute').hide();
-			p.$player.find('.btn-unmute').show();
-
 			p.ytplayer.mute();
 
 			p.opts.onMute(p);
@@ -1163,9 +947,6 @@
 
 			p.ytplayer.setVolume((p.$player.attr("data-prev-mute-volume") || 50));
 
-			p.$player.find('.btn-unmute').hide();
-			p.$player.find('.btn-mute').show();
-			
 			p.opts.onUnMute();
 
 		}),
