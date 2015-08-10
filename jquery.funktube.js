@@ -826,7 +826,8 @@
 
     	var controlStatus = '',
     		preloader = $player.find('.preloader-container'),
-    		button = $player.find('.funk-yt-button');
+    		button = $player.find('.funk-yt-button'),
+    		slideElement = $player.find('.funk-yt-slide');
 
     	switch (state) {
 
@@ -849,7 +850,7 @@
 	       	});
 
 	       	// progress bar and volume
-			$('.funk-yt-slide').each(function(){
+			slideElement.each(function(){
 
 		      	var $control = $(this),
 		      	  	$bind = $control.attr('data-control'),
