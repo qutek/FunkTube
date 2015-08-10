@@ -94,6 +94,9 @@
      -moz-background-size: cover;
        -o-background-size: cover;
           background-size: cover;
+}
+
+.funk-tube .funk-frame.image-loaded.lazy-loaded {
     -webkit-animation: fadein 1.5s; /* Safari, Chrome and Opera > 12.1 */
        -moz-animation: fadein 1.5s; /* Firefox < 16 */
         -ms-animation: fadein 1.5s; /* Internet Explorer */
@@ -318,7 +321,7 @@
 }
 .funk-yt-controls .funk-yt-slide.volume {
   margin-top: 12px;
-  width: 150px;
+  width: 70px;
   height: 10px;
   background-color: #ccc;
 }
@@ -468,9 +471,6 @@
 /**
  * Loading animation
  */
-.funk-tube .preloader-container.hide {
-  display: none;
-}
 .funk-tube .preloader-container {
   position: absolute;
   top: 50% !important;
@@ -483,6 +483,7 @@
   font-weight: normal !important;
   line-height: 1 !important;
   opacity: .9;
+  display: none;
 }
 .loader,
 .loader:before,

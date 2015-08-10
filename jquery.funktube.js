@@ -1,5 +1,5 @@
 /**
- * jQuery FunkTube (Youtube Custom Player) - v1.0
+ * jQuery FunkTube (Youtube Custom Player) - v1.1.0
  * Youtube embed with lazy load iframe and custom player style
  * based on https://github.com/nirvanatikku/jQuery-TubePlayer-Plugin
  * Copyright (c) 2015 lafif Astahdziq
@@ -15,6 +15,8 @@
 
 		FUNKTUBE_CLASS = "funk-tube",
 
+		FRAME_CLASS = 'funk-frame',
+
 		OPTS = "opts" + FUNKTUBE;
 
 	//	
@@ -25,6 +27,10 @@
 	var FT = {
 
 		inited: false,				// funktube inited flag - for destroy/re-init
+
+		containerClass: '',
+
+		interval: 0,
 		
 		ytplayers: {},				// all the instances that exist
 
@@ -101,11 +107,12 @@
 	 */
 	$.funktube.defaults = {
 
-		afterReady: function(player) {
-			// this.syncUI(player);
+		afterReady: function(player, o) {
+			// sync controll
+			FT.syncControl(player, 'ready', o);
 		}, // args: $player
 
-		stateChange: function(player) {
+		stateChange: function(player, o) {
 
 			var _ret = this.onPlayer;
 
@@ -116,15 +123,9 @@
 				if (typeof(state) === "object") {
 					state = state.data;
 				}
-
-				/* todo add conditional from options */
-				if(state == FT.State.PAUSED){
-					FT.unDim(_player);
-				}
-
-				if(state == FT.State.PLAYING){
-					FT.dimElement(_player);
-				}
+				
+				/* todo if custom control */
+				FT.syncControl(_player, state, o);
 
 				switch (state) {
 
@@ -237,7 +238,10 @@
 		width: '',
 		height: '',
 		ratio: '16:9',
+		customControl: true,
 		useThumb: true,
+		lazyLoad: true,
+		dimmed: true,
 		allowFullScreen: "true",
 		initialVideo: undefined,
 		start: 0,
@@ -399,42 +403,16 @@
       return percent;
     };
 
-	var updateOption = function(dataOpt){
-		var optionsarray = dataOpt,
-			seloption = '';
+	// var updateOption = function(dataOpt){
+	// 	var optionsarray = dataOpt,
+	// 		seloption = '';
 
-		$.each(optionsarray,function(i){
-		    seloption += '<option value="'+optionsarray[i]+'">'+optionsarray[i]+'</option>'; 
-		});
+	// 	$.each(optionsarray,function(i){
+	// 	    seloption += '<option value="'+optionsarray[i]+'">'+optionsarray[i]+'</option>'; 
+	// 	});
 
-		return seloption;
-	};
-
-	// var launchIntoFullscreen = function(element) {
-	//   	if(element.requestFullscreen) {
-	//     	element.requestFullscreen();
-	//   	} else if(element.mozRequestFullScreen) {
-	//     	element.mozRequestFullScreen();
-	//   	} else if(element.webkitRequestFullscreen) {
-	//     	element.webkitRequestFullscreen();
-	//   	} else if(element.msRequestFullscreen) {
-	//     	element.msRequestFullscreen();
-	//   	}
-
-	// 	$(element).addClass('fullscreen');
+	// 	return seloption;
 	// };
-
-	// var exitFullscreen = function(element) {
-	//   	if(document.exitFullscreen) {
-	//     	document.exitFullscreen();
-	//   	} else if(document.mozCancelFullScreen) {
-	//     	document.mozCancelFullScreen();
-	//   	} else if(document.webkitExitFullscreen) {
-	//     	document.webkitExitFullscreen();
-	//   	}
-
-	//   	$(element).removeClass('fullscreen');
-	// }
 
 	/**
 	 * Public method to get all the player instances
@@ -498,14 +476,19 @@
 
 		$player.addClass(FUNKTUBE_CLASS).data(OPTS, o);
 
+		// update container class
+		FT.containerClass = $player.attr('class');
+
 		for (var event in PLAYER)
 			$player.bind(event + FUNKTUBE, $player, PLAYER[event]);
 
 		// initialize the default event methods
 		FT.initDefaults($.funktube.defaults, o);
 
-		// alert(FT.getControl($player, o));
-		$(FT.getControl($player, o)).appendTo($player);
+		// todo change from options
+		if(o.customControl){
+			$(FT.getControl($player, o)).appendTo($player);
+		}
 
 		// if use thumbnails
 		if(o.useThumb){
@@ -515,8 +498,6 @@
 			$("<div></div>").attr("id", o.playerID).appendTo($player);
 			// init
 			FT.initPlayer($player, o);
-			// sync ui
-			FT.syncUI($player, o);
 		}
 
 		/**
@@ -526,19 +507,21 @@
 		
 
 		/**
-		 * call on initialise
-		 * Todo wrap it to conditional
+		 * call to initialize
+		 * if lazy load enabled
 		 */
-		FT.lazyload($('.funk-frame'));
+		if(o.lazyLoad){
+			FT.lazyload($('.'+FRAME_CLASS));
 
-		//call after window scrolls
-	    $(window).scroll(function(){
-	    	FT.lazyload($('.funk-frame'));
-		});
+			//call after window scrolls
+		    $(window).scroll(function(){
+		    	FT.lazyload($('.'+FRAME_CLASS));
+			});
 
-		$(window).resize(function(){
-	    	FT.lazyload($('.funk-frame'));
-		});
+			$(window).resize(function(){
+		    	FT.lazyload($('.'+FRAME_CLASS));
+			});
+		}
 
 		return $player;
 
@@ -547,7 +530,8 @@
 	FT.getThumb = function($player, o) {
 
 		// append thumbnail
-		var ratio = o.ratio.split(":"),
+		var frame = $('<div class="'+FRAME_CLASS+'"></div>').attr('id', o.playerID),
+			ratio = o.ratio.split(":"),
 			playerWidth = $player.width(),
 			thumb_img = '';
 
@@ -573,28 +557,24 @@
       	FT.playThumbnail.push('</svg>');
   		FT.playThumbnail.push('</div>'); // end of .thumb-play-button
 
-		// $('<div class="funk-frame"></div>').attr('id', o.playerID).css({
-  //           'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
-  //       }).addClass('image-loaded')
-  //       .on('click', function(){
-		// 	//append the player into the container on click
-		// 	FT.initPlayer($player, o);
-		// })
-		// .html(FT.playThumbnail.join(''))
-		// .appendTo($player);
-		
-		$('<div class="funk-frame"></div>').attr('id', o.playerID).attr('data-bgimg', '//img.youtube.com/vi/'+o.initialVideo+'/'+thumb_img)
-        .on('click', function(){
+		/**
+		 * Use data-bgimg instead of backgoround image
+		 * if lazy load enabled
+		 */
+		if(o.lazyLoad){
+			frame.attr('data-bgimg', '//img.youtube.com/vi/'+o.initialVideo+'/'+thumb_img);
+		} else {
+			frame.css({
+	            'background-image': ['url(//img.youtube.com/vi/', o.initialVideo, '/', thumb_img, ')'].join('')
+	        }).addClass('image-loaded');
+		}
+
+        frame.on('click', function(){
 			//append the player into the container on click
 			FT.initPlayer($player, o);
-
-			FT.dimElement($player);
 		})
 		.html(FT.playThumbnail.join(''))
 		.appendTo($player);
-		
-		// sync ui
-		FT.syncUI($player, o);
 
 	};
 
@@ -616,7 +596,7 @@
 		control.push('<div class="funk-yt-button btn-play icon-play" data-control="play"></div>');
 		control.push('<div class="funk-yt-button btn-pause icon-pause" data-control="pause" style="display:none;"></div>');
 		control.push('<div class="funk-yt-button btn-mute icon-unmute" data-control="mute"></div>');
-		control.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute"></div>');
+		control.push('<div class="funk-yt-button btn-unmute icon-mute" data-control="unmute" style="display:none;"></div>');
 		control.push('<div class="funk-yt-slide volume" data-control="volume"><div class="slide-control"></div></div>');
 		control.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
@@ -718,15 +698,15 @@
 
 						var $player = $(evt.target.getIframe()).parents("." + FUNKTUBE_CLASS);
 
-						$.funktube.defaults.afterReady($player);
+						$.funktube.defaults.afterReady($player, o);
 
 					},
 
-					'onPlaybackQualityChange': $.funktube.defaults.qualityChange(o.playerID),
+					'onPlaybackQualityChange': $.funktube.defaults.qualityChange(o.playerID, o),
 
-					'onStateChange': $.funktube.defaults.stateChange(o.playerID),
+					'onStateChange': $.funktube.defaults.stateChange(o.playerID, o),
 
-					'onError': $.funktube.defaults.onError(o.playerID)
+					'onError': $.funktube.defaults.onError(o.playerID, o)
 
 				}
 
@@ -758,7 +738,7 @@
 
 		}
 
-		return window.onYouTubePlayerAPIReady;
+		return window.onYouTubeIframeAPIReady;
 
 	};
 
@@ -800,8 +780,13 @@
 
 		FT.initIframePlayer($player, o);
 
-		$($player).find('.funk-frame').removeClass('image-loaded').addClass('video-loaded')
-		.css('background-image','');
+		$($player).find('.'+FRAME_CLASS)
+			.removeClass('image-loaded')
+			.removeClass('lazy-loaded')
+			.addClass('video-loaded')
+			.css('background-image','');
+
+		this.syncControl($player, 'inited', o);
 
 	};
 
@@ -820,101 +805,196 @@
     	target.toggleClass('fullscreen');
     };
 
-	FT.syncUI = function($player, o) {
+    FT.UpdateMuted = function($player, isMuted) {
+    	var button = $player.find('.funk-yt-button');
+    	if(typeof isMuted == 'undefined' ){
+    		isMuted = $player.funktube('isMuted');
+    	}
+    	if(isMuted){
+			// alert('dimut');
+			$player.find("[data-control='mute']").hide();
+			$player.find("[data-control='unmute']").show();
+		} else {
+			// alert('gak');
+			$player.find("[data-control='unmute']").hide();
+			$player.find("[data-control='mute']").show();
+		}
+    };
 
-       	$player.find('.funk-yt-button').on('click', function(){
-       		alert(FT.inited);
-       		var bind = $(this).attr('data-control'),
-				param = $(this).attr('data-param');
+    FT.syncControl = function($player, state, o){
+    	// alert(state);
 
-			if(typeof(bind) == 'string'){
-				$player.funktube(bind, param);
+    	var controlStatus = '',
+    		preloader = $player.find('.preloader-container'),
+    		button = $player.find('.funk-yt-button');
+
+    	switch (state) {
+
+		case 'inited':
+			controlStatus = 'inited';
+			if(o.dimmed) FT.dimElement($player);
+
+			button.on('click', function(){
+				// bind button to call actions
+	       		var bind = $(this).attr('data-control'),
+					param = $(this).attr('data-param');
+
+				if(typeof(bind) == 'string'){
+					$player.funktube(bind, param);
+					
+					// if ( bind == 'mute' || bind == 'unmute' ){
+					// 	alert($player.funktube('isMuted'));
+					// }
+				}
+	       	});
+
+	       	// progress bar and volume
+			$('.funk-yt-slide').each(function(){
+
+		      	var $control = $(this),
+		      	  	$bind = $control.attr('data-control'),
+		          	$window = $(window);
+
+		      	$control.on('mousedown', function() {
+		        	$control.on('mousemove', function(){
+
+				        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+				        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+				        // update
+			          	if($bind == 'seek'){
+				        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
+				        } else {
+				        	$player.funktube($bind, setFill(event, $control).toFixed());
+				        }
+		        	});
+		      	});
+
+		      	$control.on('click', function(event) {
+
+			        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
+			        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
+			        // update
+			        if($bind == 'seek'){
+			        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
+			        } else {
+			        	$player.funktube($bind, setFill(event, $control).toFixed());
+			        }
+		      	});
+
+		      	$window.on('mouseup', function(event) {
+		        	$control.off('mousemove');
+		      	});
+		    });
+
+			// fullscreen
+			$player.find('.fullscreen').on('click', function(){
+
+				var elem = $player.get(0);
+
+				if($player.hasClass('fullscreen')){
+					FT.cancelFullScreen(elem);
+				} else {
+					FT.requestFullScreen(elem);
+				}
+
+			});
+
+	        break;
+
+		case FT.State.UNSTARTED:
+			controlStatus = 'unstarted';
+
+	        break;
+
+		case FT.State.ENDED:
+			controlStatus = 'ended';
+			if(o.dimmed) FT.unDim($player);
+
+	        break;
+
+		case FT.State.PLAYING:
+			controlStatus = 'playing';
+			if(o.dimmed) FT.dimElement($player);
+
+			$player.find("[data-control='play']").hide();
+			$player.find("[data-control='pause']").show();
+
+			this.UpdateMuted($player);
+
+			// hide preloader
+			preloader.hide();
+
+			FT.interval = setInterval(function(){
+			   	FT.playerData = $player.funktube('data');
+			   	// console.log(FT.playerData.currentTime);
+			   	$player.find('.current-time').text(convertTime(FT.playerData.currentTime));
+			   	$player.find('.total-time').text('| '+ convertTime(FT.playerData.duration));
+				$player.find('.funk-yt-time-current').css('width', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set progressbar percentage
+				$player.find('.funk-yt-time-float').css('left', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set position of tooltip
+				$player.find('.funk-yt-time-loaded').css('width', FT.playerData.videoLoadedFraction*FT.playerData.duration);
+			   	$player.find('.funk-yt-time-float-current').text(convertTime(FT.playerData.currentTime));
+			},100); //polling frequency in miliseconds
+				
+	        break;
+
+		case FT.State.PAUSED:
+			controlStatus = 'paused';
+			if(o.dimmed) FT.unDim($player);
+
+			$player.find("[data-control='pause']").hide();
+			$player.find("[data-control='play']").show();
+			
+			clearInterval(FT.interval);
+
+	        break;
+
+		case FT.State.BUFFERING:
+			// alert('buffer');
+			controlStatus = 'buffering';
+
+			if(FT.overlayElement.dimmed){
+				preloader.css({
+				   'z-index' : FT.overlayElement.curtainZIndex+1
+				});
 			}
-       	});
 
-       	// alert(curQuality);
-		setInterval(function(){
-		   	FT.playerData = $player.funktube('data');
-		   	// console.log(FT.playerData.currentTime);
-		   	$player.find('.current-time').text(convertTime(FT.playerData.currentTime));
-		   	$player.find('.total-time').text('| '+ convertTime(FT.playerData.duration));
-			$player.find('.funk-yt-time-current').css('width', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set progressbar percentage
-			$player.find('.funk-yt-time-float').css('left', getPercent(FT.playerData.currentTime, FT.playerData.duration)+'%'); // set position of tooltip
-			$player.find('.funk-yt-time-loaded').css('width', FT.playerData.videoLoadedFraction*FT.playerData.duration);
-		   	$player.find('.funk-yt-time-float-current').text(convertTime(FT.playerData.currentTime));
-		},100); //polling frequency in miliseconds
+			preloader.show();
 
-		// progress bar and volume
-		$('.funk-yt-slide').each(function(){
+	        break;
 
-	      var $control = $(this),
-	      	  $bind = $control.attr('data-control'),
-	          $window = $(window);
+		case FT.State.CUED:
+			controlStatus = 'cued';
 
-	      $control.on('mousedown', function() {
-	        $control.on('mousemove', function(){
+	        break;
 
-		        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
-		        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
-		        // update
-	          	if($bind == 'seek'){
-		        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
-		        } else {
-		        	$player.funktube($bind, setFill(event, $control).toFixed());
-		        }
-	        });
-	      });
+		default:
+			controlStatus = state;
 
-	      $control.on('click', function(event) {
+		}
 
-	        $control.find('.slide-control').css('width', setFill(event, $control) + '%');
-	        $control.find('.slide-info').css('left', setFill(event, $control) + '%');
-	        // update
-	        if($bind == 'seek'){
-	        	$player.funktube($bind, ( setFill(event, $control) / 100) * FT.playerData.duration );
-	        } else {
-	        	$player.funktube($bind, setFill(event, $control).toFixed());
-	        }
-	      });
+		// add state to element data and class for styling
+		$player.attr('data-status', controlStatus);
+		$player.attr('class', FT.containerClass+ ' '+controlStatus);
 
-	      $window.on('mouseup', function(event) {
-	        $control.off('mousemove');
-	      });
-	    });
-
-		// fullscreen
-		$player.find('.fullscreen').on('click', function(){
-
-			var elem = $player.get(0);
-
-			if($player.hasClass('fullscreen')){
-				FT.cancelFullScreen(elem);
-			} else {
-				FT.requestFullScreen(elem);
-			}
-
-		});
-	
-
-		/**
-		 * Todo add quality change button
-		 */
-
-   	};
+		// alert(FT.containerClass);
+    	// console.log($player);
+    	// $player.addClass('wakakak'+state);
+    }
 
    	FT.lazyload = function(elem){
 		var viewport_height = $(window).height();
 		var scrollTop = $(document).scrollTop();
 		
-		if(elem.filter(":not('.loaded')").length){
-			elem.filter(":not('.loaded')").each(function() {
+		if(elem.filter(":not('.lazy-loaded')").length){
+			elem.filter(":not('.lazy-loaded')").each(function() {
 		        // Do something to each element here.
 	        	var offset_top = $(this).offset().top;
 				var elem_height = $(this).height();
 				if(offset_top + elem_height/3 < viewport_height + scrollTop){
 					var bg_img = $(this).data('bgimg');
-					$(this).css({'background-image':"url("+bg_img+")"}).addClass('image-loaded').fadeIn();
-					$(this).addClass('loaded');
+					$(this).css({'background-image':"url("+bg_img+")"})
+					.addClass('image-loaded')
+					.addClass('lazy-loaded').fadeIn();
 				}
 		    });
 		}
@@ -986,7 +1066,7 @@
 		}
 
 		// init the iframe player
-		window.onYouTubePlayerAPIReady = FT.iframeReady(o);
+		window.onYouTubeIframeAPIReady = FT.iframeReady(o);
 
 	};
 
@@ -1078,6 +1158,8 @@
 
 			p.ytplayer.mute();
 
+			FT.UpdateMuted(p.$player, true);
+
 			p.opts.onMute(p);
 
 		}),
@@ -1087,6 +1169,8 @@
 			p.ytplayer.unMute();
 
 			p.ytplayer.setVolume((p.$player.attr("data-prev-mute-volume") || 50));
+
+			FT.UpdateMuted(p.$player, false);
 
 			p.opts.onUnMute();
 
@@ -1185,6 +1269,9 @@
 		destroy: wrap_fn(function(evt, param, p) {
 			
 			p.$player.removeClass(FUNKTUBE_CLASS).data(OPTS, null).unbind(FUNKTUBE).html("");
+			
+			// update container class
+			FT.containerClass = $player.attr('class');
 
 			delete FT.ytplayers[p.opts.playerID];
 
