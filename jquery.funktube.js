@@ -108,8 +108,8 @@
 	$.funktube.defaults = {
 
 		afterReady: function(player, o) {
-			// sync controll
-			FT.syncControl(player, 'ready', o);
+			// sync control if enabled
+			if (o.customControl) FT.syncControl(player, 'ready', o);
 		}, // args: $player
 
 		stateChange: function(player, o) {
@@ -124,8 +124,8 @@
 					state = state.data;
 				}
 				
-				/* todo if custom control */
-				FT.syncControl(_player, state, o);
+				// sync control if enabled
+				if (o.customControl) FT.syncControl(_player, state, o);
 
 				switch (state) {
 
@@ -189,7 +189,7 @@
 
 		},
 
-		qualityChange: function(player) {
+		qualityChange: function(player, o) {
 
 			var _this = this;
 
@@ -200,6 +200,9 @@
 				if (typeof(suggested) === "object") {
 					suggested = suggested.data;
 				}
+
+				// sync control if enabled
+				if (o.customControl) FT.updateQuality(_player, suggested, o);
 
 				return _this.onQualityChange[player].call(_player, suggested);
 
@@ -389,6 +392,41 @@
 	 */
 	var getPercent = function(cur, tot) {
 		return (cur / tot * 100).toFixed(2);
+	};
+
+	/**
+	 * Create list for available quality
+	 * @param  {[type]} available  [description]
+	 * @param  {[type]} curQuality [description]
+	 * @return {[type]}            [description]
+	 */
+	var createQualitylevel = function(available, curQuality){
+		// Create the list element:
+	    var list = document.createElement('ul'),
+	    	current = document.createElement('li');
+
+	    for(var i = 0; i < available.length; i++) {
+	        // Create the list item:
+	        var item = document.createElement('li'),
+	        	link = document.createElement('a');
+
+	       	link.appendChild(document.createTextNode(available[i]));
+	        link.setAttribute("data-quality", available[i]);
+
+	        // Set its contents:
+	        item.appendChild(link);
+
+	        // Add it to the list:
+	        list.appendChild(item);
+	    }
+
+	    current.setAttribute('class', 'sep');
+	    current.appendChild(document.createTextNode(curQuality));
+
+	    list.appendChild(current);
+
+	    // Finally, return the constructed list:
+	    return list;
 	};
 
 	var setFill = function(event, slideEl) {
@@ -601,10 +639,10 @@
 		control.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		// control.push('<div class="btn-right quality">');
-		// control.push('<div class="quality-status"></div>');
-		// control.push('<div class="av-quality"></div>'); // container available quality
-		// control.push('</div>');
+		control.push('<div class="btn-right quality">');
+		control.push('<div class="quality-status">auto</div>');
+		control.push('<div class="av-quality"></div>'); // container available quality
+		control.push('</div>');
 		control.push('</div>');
 
 		// insert the player container
@@ -786,7 +824,8 @@
 			.addClass('video-loaded')
 			.css('background-image','');
 
-		this.syncControl($player, 'inited', o);
+		// sync control if enabled
+		if (o.customControl) this.syncControl($player, 'inited', o);
 
 	};
 
@@ -821,12 +860,46 @@
 		}
     };
 
+    FT.updateQuality = function($player, suggested, o){
+    	// wait a moment for data updated
+    	setTimeout(function(){
+    		var avLevel = $player.funktube('data').availableQualityLevels,
+    			availableQuality = (typeof avLevel == 'object' && avLevel.length) ? avLevel : ['auto'],
+    			list = createQualitylevel(availableQuality, suggested),
+				elQuality = $player.find('.quality');
+    		
+    		// maybe with options auto use suggest quality or if auto
+    		// $player.funktube('quality', suggested);
+    		
+
+			elQuality.find('.quality-status').html(suggested);	
+			elQuality.find('.av-quality').html(list);
+
+			elQuality.find('a').on('click', function(){
+				var setQuality = $(this).attr('data-quality'),
+					icon = $(this).attr('data-quality'); // todo change to icon
+				// alert(setQuality);
+				
+				elQuality.removeClass('focused');
+				$player.funktube('quality', setQuality);
+
+				elQuality.find('.quality-status').html(setQuality);
+      			elQuality.find('.sep').html(icon);
+
+      			// alert($player.funktube('quality'));
+			});
+
+    	}, 100);
+
+    };
+
     FT.syncControl = function($player, state, o){
     	// alert(state);
 
     	var controlStatus = '',
     		preloader = $player.find('.preloader-container'),
     		button = $player.find('.funk-yt-button'),
+    		elQuality = $player.find('.quality'),
     		slideElement = $player.find('.funk-yt-slide');
 
     	switch (state) {
@@ -848,6 +921,9 @@
 					// }
 				}
 	       	});
+
+	       	// create base quality
+			FT.updateQuality($player, FT.playerData.quality, o);
 
 	       	// progress bar and volume
 			slideElement.each(function(){
@@ -900,6 +976,21 @@
 
 			});
 
+			// debug
+			// $player.find('.quality-status').on('click', function(){
+			// 	alert($player.funktube('quality'));
+			// });
+
+
+			elQuality.on({
+		        mouseenter: function () {
+		            $(this).addClass('focused');
+		        },
+		        mouseleave: function () {
+		            $(this).removeClass('focused');
+		        }
+		    });
+
 	        break;
 
 		case FT.State.UNSTARTED:
@@ -926,7 +1017,15 @@
 			preloader.hide();
 
 			FT.interval = setInterval(function(){
-			   	FT.playerData = $player.funktube('data');
+			   	var newData = $player.funktube('data');
+			   	
+			   	if(newData.availableQualityLevels != FT.playerData.availableQualityLevels){
+			   		// update quality list
+			   		FT.updateQuality($player, newData.quality, o);
+			   	}
+
+			   	FT.playerData = newData;
+			   	
 			   	// console.log(FT.playerData.currentTime);
 			   	$player.find('.current-time').text(convertTime(FT.playerData.currentTime));
 			   	$player.find('.total-time').text('| '+ convertTime(FT.playerData.duration));
@@ -1244,6 +1343,8 @@
 			ret.availableQualityLevels = P.getAvailableQualityLevels();
 			
 			ret.availablePlaybackRates = P.getAvailablePlaybackRates();
+			
+			ret.quality = P.getPlaybackQuality();
 
 			return ret;
 
