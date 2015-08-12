@@ -635,7 +635,7 @@
 		control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
 		control.push('<div class="btn-right quality">');
-		control.push('<div class="quality-status">auto</div>');
+		control.push('<div class="quality-status">'+o.preferredQuality+'</div>');
 		control.push('<div class="av-quality"></div>'); // container available quality
 		control.push('</div>');
 		control.push('</div>');
