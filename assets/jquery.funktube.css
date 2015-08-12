@@ -155,12 +155,16 @@
 .funk-tube .funk-yt-controls {
   position: absolute;
   width: 100%;
-  height: 32px;
+  height: 0px;
   left: 0;
   bottom: 0;
   background: rgb(0,0,0); /* IE8- */
   background: rgba(0,0,0, .7);
   z-index: 1;
+  -webkit-transition: height 500ms ease-out 0.1s;
+    -moz-transition: height 500ms ease-out 0.1s;
+    -o-transition: height 500ms ease-out 0.1s;
+    transition: height 500ms ease-out 0.1s;
 }
 
 /**
@@ -255,7 +259,7 @@
   top: -26px;
   margin-left: -17px;
 }
-.funk-tube.focused .funk-yt-controls .funk-yt-time-rail .funk-yt-time-float {
+.funk-tube.focused .funk-yt-controls .funk-yt-time-rail.focused .funk-yt-time-float {
   display: block;
 }
 

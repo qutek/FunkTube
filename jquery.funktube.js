@@ -616,7 +616,7 @@
 		// create controll
 		control.push('<div class="preloader-container"><div class="loader"></div></div>');
 		control.push('<div class="funk-yt-controls">');
-        control.push('<div class="funk-yt-time-rail">');
+        control.push('<div class="funk-yt-time-rail focus">');
       	control.push('<span class="funk-yt-time-total funk-yt-slide" data-control="seek">');
         control.push('<span class="funk-yt-time-loaded"></span>');
 		control.push('<span class="funk-yt-time-current slide-control"></span>');
@@ -634,7 +634,7 @@
 		control.push('<div class="funk-yt-info current-time">00:00:00</div>');
 		control.push('<div class="funk-yt-info total-time">| 00:00:00</div>');
 		control.push('<div class="funk-yt-button btn-right icon-fullscreen fullscreen"></div>');
-		control.push('<div class="btn-right quality">');
+		control.push('<div class="btn-right quality focus">');
 		control.push('<div class="quality-status">'+o.preferredQuality+'</div>');
 		control.push('<div class="av-quality"></div>'); // container available quality
 		control.push('</div>');
@@ -899,6 +899,7 @@
 
 		case 'inited':
 			controlStatus = 'inited';
+
 			if(o.dimmed) FT.dimElement($player);
 
 			button.on('click', function(){
@@ -975,7 +976,16 @@
 			// });
 
 
-			elQuality.on({
+			$player.find('.focus').on({
+		        mouseenter: function () {
+		            $(this).addClass('focused');
+		        },
+		        mouseleave: function () {
+		            $(this).removeClass('focused');
+		        }
+		    });
+
+		    $player.on({
 		        mouseenter: function () {
 		            $(this).addClass('focused');
 		        },
@@ -1068,6 +1078,8 @@
 		// add state to element data and class for styling
 		$player.attr('data-status', controlStatus);
 		$player.attr('class', FT.containerClass+ ' '+controlStatus);
+
+		if( state == FT.State.PLAYING ) $player.addClass('focused');
 
 		// alert(FT.containerClass);
     	// console.log($player);
