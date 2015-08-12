@@ -985,14 +985,18 @@
 		        }
 		    });
 
-		    $player.on({
-		        mouseenter: function () {
-		            $(this).addClass('focused');
-		        },
-		        mouseleave: function () {
-		            $(this).removeClass('focused');
-		        }
-		    });
+			if(o.autoHide){
+				$player.on({
+			        mouseenter: function () {
+			            $(this).addClass('focused');
+			        },
+			        mouseleave: function () {
+			            $(this).removeClass('focused');
+			        }
+			    });
+			} else {
+				$player.addClass('focused');
+			}
 
 	        break;
 
