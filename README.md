@@ -82,39 +82,39 @@ Please check out the simple example [here](https://github.com/qutek/FunkTube/blo
 
 ## Methods ##
 
-    jQuery("#element").funkplayer("cue", playerId);
+    jQuery("#element").funktube("cue", playerId);
+        
+    jQuery("#element").funktube("play");
+    jQuery("#element").funktube("play", videoId);
+    jQuery("#element").funktube("play", {id: videoId, time: 0});
     
-    jQuery("#element").funkplayer("play");
-    jQuery("#element").funkplayer("play", videoId);
-    jQuery("#element").funkplayer("play", {id: videoId, time: 0});
+    jQuery("#element").funktube("pause");
     
-    jQuery("#element").funkplayer("pause");
+    jQuery("#element").funktube("stop");
     
-    jQuery("#element").funkplayer("stop");
+    jQuery("#element").funktube("seek","0:32");
+    jQuery("#element").funktube("seek",100); // or use seconds
     
-    jQuery("#element").funkplayer("seek","0:32");
-    jQuery("#element").funkplayer("seek",100); // or use seconds
+    jQuery("#element").funktube("mute");
+    jQuery("#element").funktube("unmute");
+    jQuery("#element").funktube("isMuted");
     
-    jQuery("#element").funkplayer("mute");
-    jQuery("#element").funkplayer("unmute");
-    jQuery("#element").funkplayer("isMuted");
+    jQuery("#element").funktube("volume");
+    jQuery("#element").funktube("volume",50);
     
-    jQuery("#element").funkplayer("volume");
-    jQuery("#element").funkplayer("volume",50);
+    jQuery("#element").funktube("quality");
+    jQuery("#element").funktube("quality", "hd720");
     
-    jQuery("#element").funkplayer("quality");
-    jQuery("#element").funkplayer("quality", "hd720");
+    jQuery("#element").funktube("playbackRate"); 
+    jQuery("#element").funktube("playbackRate", 1.5); // video must support this
     
-    jQuery("#element").funkplayer("playbackRate"); 
-    jQuery("#element").funkplayer("playbackRate", 1.5); // video must support this
+    jQuery("#element").funktube("data");
+    jQuery("#element").funktube("opts");
+    jQuery("#element").funktube("videoId");
     
-    jQuery("#element").funkplayer("data");
-    jQuery("#element").funkplayer("opts");
-    jQuery("#element").funkplayer("videoId");
+    jQuery("#element").funktube("destroy");
     
-    jQuery("#element").funkplayer("destroy");
-    
-    jQuery("#element").funkplayer("player");
+    jQuery("#element").funktube("player");
 
 ## Install using Bower ##
 
