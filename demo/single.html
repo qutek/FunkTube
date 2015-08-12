@@ -91,7 +91,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
-    <div class='player' data-id="fWol0TkZex0"></div>
+    <div id='player' data-id="fWol0TkZex0"></div>
     <div class="events-examples">
         <a href="javascript:void(0);" onClick="jQuery('#player').funktube('play');">
             <div class='player-action'> jQuery('#player').funktube(<span class='event'>'play'</span>); </div>
@@ -135,10 +135,8 @@
     
     <script src="../jquery.funktube.js"></script>
     <script>
-    jQuery(".player").funktube({
-        width: 600, // the width of the player
-        height: 450, // the height of the player
-        allowFullScreen: "true", // true by default, allow user to go full screen
+    jQuery("#player").funktube({
+        allowFullScreen: true, // true by default, allow user to go full screen
         lazyLoad: false,
         // initialVideo: "M7lc1UVf-VE", // the video that is loaded into the player
         // playlist: "RDtKtZIcVODlM",

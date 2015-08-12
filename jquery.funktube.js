@@ -238,14 +238,12 @@
 	var defaults = {
 
 		// public facing
-		width: '',
-		height: '',
 		ratio: '16:9',
 		customControl: true,
 		useThumb: true,
 		lazyLoad: true,
 		dimmed: true,
-		allowFullScreen: "true",
+		allowFullScreen: true,
 		initialVideo: undefined,
 		start: 0,
 		preferredQuality: "auto",
@@ -262,13 +260,10 @@
 		// 'red' or 'white'
 		showinfo: false,
 		modestbranding: false,
+		enablejsapi: true,
+		origin: '',
 		protocol: 'http',
 		// set to 'https' for compatibility on SSL-enabled pages
-		// with respect to [wmode] - 'transparent' maintains z-index, but disables GPU acceleration
-		wmode: 'transparent',
-		// you probably want to use 'window' when optimizing for mobile devices
-		
-		allowScriptAccess: "always",
 		playerID: "funktube-container",
 
 		// functions called when events are triggered by using the funktube interface
@@ -676,7 +671,7 @@
 
 	/**
 	 * This method handles the player init. Since
-	 * onYouFunkTubeReady is called when the script
+	 * onYouTubeReady is called when the script
 	 * has been evaluated, we want all the instances
 	 * to get init'd. For this we have a init queue.
 	 * If the script has been init'd, we automatically
@@ -689,10 +684,6 @@
 			new YT.Player(o.playerID, {
 
 				videoId: o.initialVideo,
-
-				width: o.width,
-
-				height: o.height,
 
 				playerVars: {
 
@@ -710,8 +701,6 @@
 
 					'fs': (o.allowFullScreen ? 1 : 0),
 
-					'wmode': o.wmode,
-
 					'showinfo': (o.showinfo ? 1 : 0),
 
 					'modestbranding': (o.modestbranding ? 1 : 0),
@@ -724,7 +713,11 @@
 
 					'color': o.color,
 
-					'playsinline': o.playsinline
+					'playsinline': o.playsinline,
+
+					'enablejsapi': (o.enablejsapi ? 1 : 0),
+
+					'origin': o.origin
 
 				},
 
@@ -923,7 +916,7 @@
 	       	});
 
 	       	// create base quality
-			FT.updateQuality($player, FT.playerData.quality, o);
+			FT.updateQuality($player, o.preferredQuality, o);
 
 	       	// progress bar and volume
 			slideElement.each(function(){
@@ -1356,6 +1349,7 @@
 
 		}),
 
+		// todo set size for wrapper
 		size: wrap_fn(function(evt, param, p) {
 
 			if (typeof param !== 'undefined' && param.width && param.height) {
