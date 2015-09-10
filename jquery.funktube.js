@@ -813,7 +813,7 @@
 
 		$($player).find('.'+FRAME_CLASS)
 			.removeClass('image-loaded')
-			.removeClass('lazy-loaded')
+			// .removeClass('lazy-loaded')
 			.addClass('video-loaded')
 			.css('background-image','');
 
