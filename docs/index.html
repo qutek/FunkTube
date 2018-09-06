@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>FunkTube Examples</title>
+    <link rel="stylesheet" href="assets/jquery.funktube.css">
+    <style>
+        /* *********************************************************************************************************************
+         * One% CSS Grid - 12 Columns Fluid CSS Grid System
+         * Main container for all
+         */
+        .onepcssgrid-1000, .onepcssgrid-1200 {
+            margin: 0 auto;
+            padding: 0 0 0 1%; /* THAT'S THE NAME ;) */
+        }
+        .onepcssgrid-1200 {
+            max-width: 1220px;
+        }
+        .onepcssgrid-1000 {
+            max-width: 1020px;
+        }
+        .onerow {
+            clear: both;
+            padding: 0 10px;
+        }
+
+        /* *********************************************************************************************************************
+         * Common columns definitions
+         */
+        .col1, .col2, .col3, .col4, .col5, .col6, .col7, .col8, .col9, .col10, .col11, .col12 {
+            float: left;
+            margin: 0 3% 0 0;
+        }
+        .col1.last, .col2.last, .col3.last, .col4.last, .col5.last, .col6.last, .col7.last, .col8.last, .col9.last, .col10.last, .col11.last, .col12 {
+            margin: 0;
+        }
+        .col1 { width: 5.5%; }
+        .col2 { width: 14%; }
+        .col3 { width: 22.5%; }
+        .col4 { width: 31%; }
+        .col5 { width: 39.5%; }
+        .col6 { width: 48%; }
+        .col7 { width: 56.5%; }
+        .col8 { width: 65%; }
+        .col9 { width: 73.5%; }
+        .col10 { width: 82%; }
+        .col11 { width: 90.5%; }
+        .col12 { width: 99%; margin: 0; }
+
+        .col1 img, .col2 img, .col3 img, .col4 img, .col5 img, .col6 img, .col7 img, .col8 img, .col9 img, .col10 img, .col11 img, .col12 img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* *********************************************************************************************************************
+         * Disable padding left/right 10px if I'm 1024 or gibber - correct percentage math
+         */
+        @media all and (min-width: 1024px) {
+            .onepcssgrid-1000 {
+                max-width: 1000px;
+            }
+
+            .onepcssgrid-1000 .onerow {
+                padding: 0;
+            }
+        }
+
+        /* *********************************************************************************************************************
+         * Small devices
+         */
+        @media all and (max-width: 768px) {
+            .onerow {
+            }
+
+            .col1, .col2, .col3, .col4, .col5, .col6, .col7, .col8, .col9, .col10, .col11 {
+                float: none;
+                width: 99%;
+            }
+
+             .col1.last, .col2.last, .col3.last, .col4.last, .col5.last, .col6.last, .col7.last, .col8.last, .col9.last, .col10.last, .col11.last, .col12 {
+                margin-bottom: 20px;
+            }
+        }
+
+        .onerow > div {
+            margin-bottom: 20px;
+        }
+
+        body {
+            background: #FFEB3B;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        
+        .title {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #events-examples a {
+            text-decoration: none;
+        }
+
+        #events-examples a:hover {
+            font-weight: bold;
+        }
+
+        .player-action {
+            color: #000;
+            margin: 5px 0;
+            text-decoration: none;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+    <h1 class="title">FunkTube Samples</h1>
+    <br>
+    <div class="onepcssgrid-1200">
+        <div class="onerow">
+            <div class="col4">
+                <div class='sample' data-id="3vB4gpXVtIs"></div>
+            </div>
+            <div class="col4">
+                <div class='sample' data-id="TbliHS_5GhM"></div>
+            </div>
+            <div class="col4 last">
+                <div class='sample' data-id="OG2eGVt6v2o"></div>
+            </div>
+        </div>
+
+        <div class="onerow">
+            <div class="col6">
+                <div class='sample' data-id="Bey4XXJAqS8"></div>
+            </div>
+            <div class="col6 last">
+                <div class='sample' data-id="GUEZCxBcM78"></div>
+            </div>
+        </div>
+
+        <div class="onerow">
+            <div class="col12">
+                <h2 class="title">Events</h2>
+            </div>
+            <div class="col12">
+                <div id='player'></div>
+            </div>
+            <div class="col6">
+                <div id="events-examples" class="hidden">
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('play');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'play'</span>); </div>
+                    </a>
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('pause');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'pause'</span>); </div>
+                    </a> 
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('stop');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'stop'</span>); </div>
+                    </a> 
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('mute');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'mute'</span>); </div>
+                    </a> 
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('volume', 25);">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'volume'</span>, 25); </div>
+                    </a> 
+                    <a href="javascript:void(0);" onClick="jQuery('#player-volume').html(jQuery('#player').funktube('volume'));">
+                        <div class='player-action'> 
+                            jQuery('#player').funktube(<span class='event'>'volume'</span>); = 
+                            <span id='player-volume'>?</span>
+                        </div>
+                    </a> 
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('unmute');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'unmute'</span>); </div>
+                    </a>
+                    <a href="javascript:void(0);" onClick="showData(jQuery('#player').funktube('data'));">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'data'</span>); </div>
+                    </a>
+                    <hr/>
+                    <a href="javascript:void(0);" onClick="jQuery('#player').funktube('play', '1kexltDCQh0');">
+                        <div class='player-action'> jQuery('#player').funktube(<span class='event'>'play'</span>, '1kexltDCQh0'); </div>
+                    </a> 
+                </div>
+            </div>
+            <div class="col6 last">
+                <ul id='event-log'></ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="assets/jquery.funktube.js"></script>
+    <script>
+    jQuery(".sample").funktube();
+
+    jQuery("#player").funktube({
+        allowFullScreen: true, // true by default, allow user to go full screen
+        dimmed: false,
+        customControl: true,
+        useThumb: true,
+        initialVideo: "2MpUj-Aua48", // the video that is loaded into the player
+        // playlist: "RDtKtZIcVODlM",
+        // loop: "true",
+        preferredQuality: "default",// preferred quality: default, small, medium, large, hd720
+        onSeek: function(time){ jQuery("#event-log").append('<li>- Event: seek</li>'); }, // after the video has been seeked to a defined point
+        onMute: function(){ jQuery("#event-log").append('<li>- Event: mute</li>'); }, // after the player is muted
+        onUnMute: function(){ jQuery("#event-log").append('<li>- Event: unmute</li>'); }, // after the player is unmuted
+        onPlayerUnstarted: function(){ jQuery("#event-log").append('<li>- Event: unstarted</li>'); }, // when the player returns a state of unstarted
+        onPlayerEnded: function(){ jQuery("#event-log").append('<li>- Event: ended</li>'); },    // when the player returns a state of ended
+        onPlayerPlaying: function(){ 
+            jQuery('#events-examples').removeClass('hidden');
+            jQuery("#event-log").append('<li>- Event: playing</li>'); 
+        }, //when the player returns a state of playing
+        onPlayerPaused: function(){ jQuery("#event-log").append('<li>- Event: paused</li>'); },   // when the player returns a state of paused
+        onPlayerBuffering: function(){ jQuery("#event-log").append('<li>- Event: buffering</li>'); }, // when the player returns a state of buffering
+        onPlayerCued: function(){ jQuery("#event-log").append('<li>- Event: cued</li>'); },     // when the player returns a state of cued
+        onQualityChange: function(quality){ jQuery("#event-log").append('<li>- Event: quality changed</li>'); }, // a function callback for when the quality of a video is determined
+        onErrorNotFound: function(){ jQuery("#event-log").append('<li>- Event: not found</li>'); }, // if a video cant be found
+        onErrorNotEmbeddable: function(){ jQuery("#event-log").append('<li>- Event: not embedable</li>'); }, // if a video isnt embeddable
+        onErrorInvalidParameter: function(){ jQuery("#event-log").append('<li>- Event: invalid param</li>'); } // if we've got an invalid param
+    });
+    </script>
+</body>
+</html>
