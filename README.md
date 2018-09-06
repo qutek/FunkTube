@@ -20,7 +20,6 @@ Include jQuery, this jQuery plugin, and then initialize the element :
     <script>
 	    $("#element").funktube();
     </script>
-Please check out the simple example [here](https://github.com/qutek/FunkTube/blob/master/demo/sample.html) 
 
 ## Default Options ##
 
