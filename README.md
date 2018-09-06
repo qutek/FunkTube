@@ -2,7 +2,7 @@
 This jQuery plugin provides responsive youtube embed with lazy loading iframe using video thumbnails as container background before iframe embeded, so it may be useful when displaying a lot of video on one page.
 
 Check out the demo to view :
-[http://demo.astahdziq.in/funktube/demo/lazyload.html](http://demo.astahdziq.in/funktube/demo/lazyload.html)
+[http://qutek.github.io/FunkTube/](http://qutek.github.io/FunkTube/)
  
 ## How to use ##
 Include funktube stylesheet :
@@ -21,7 +21,7 @@ Include jQuery, this jQuery plugin, and then initialize the element :
 	    $("#element").funktube();
     </script>
 
-## Default Options ##
+## Default Options ##ƒ
 
     <script>
 	   $("#element").funktube({
