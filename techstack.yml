@@ -1,0 +1,54 @@
+repo_name: qutek/FunkTube
+report_id: 709ade680b6507a5abaf731dfef41b8b
+version: 0.1
+repo_type: Public
+timestamp: '2024-01-05T08:43:41+00:00'
+requested_by: qutek
+provider: github
+branch: master
+detected_tools_count: 4
+tools:
+- name: CSS 3
+  description: The latest evolution of the Cascading Style Sheets language
+  website_url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS3
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/6727/css.png
+  detection_source_url: https://github.com/qutek/FunkTube
+  detection_source: Repo Metadata
+- name: JavaScript
+  description: Lightweight, interpreted, object-oriented language with first-class
+    functions
+  website_url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/qutek/FunkTube
+  detection_source: Repo Metadata
+- name: jQuery
+  description: The Write Less, Do More, JavaScript Library.
+  website_url: http://jquery.com/
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: Javascript UI Libraries
+  image_url: https://img.stackshare.io/service/1021/lxEKmMnB_400x400.jpg
+  detection_source_url: https://github.com/qutek/FunkTube/blob/master/bower.json
+  detection_source: bower.json
+  last_updated_by: Lafif Astahdziq
+  last_updated_on: 2015-06-17 16:49:45.000000000 Z
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/qutek/FunkTube
+  detection_source: Repo Metadata
